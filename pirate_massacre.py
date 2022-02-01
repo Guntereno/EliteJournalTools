@@ -24,6 +24,8 @@ class SystemInfo:
         self.name = name
         self.factions = factions
 
+def is_wing_massacre(mission_name):
+    return mission_name.startswith('Mission_MassacreWing')
 class PirateMassacreScanner(journal_scan.JournalScanner):
     mission_queue = []
     mission_dict = {}
@@ -52,7 +54,7 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
     def handle_missions(self, event):
         if event['Active']:
             for mission in event['Active']:
-                if(mission['Name'] == 'Mission_MassacreWing_name'):
+                if(is_wing_massacre(mission['Name'])):
                     id = mission['MissionID']
                     # We only want to add missions we're not already tracking
                     if not id in self.mission_dict:
@@ -78,7 +80,7 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
     #     "MissionID": 842359897
     # }
     def handle_mission_accepted(self, event):
-        if event['Name'] == 'Mission_MassacreWing':
+        if is_wing_massacre(event['Name']):
             id = event['MissionID']
             mission =  MissionInfo(
                 id,
@@ -306,6 +308,10 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
         self.register_handler("Location", self.handle_location)
 
     def finalise(self):
+
+        print(f'Currently tracking {len(self.mission_queue)}/20 missions.')
+        print()
+
         system_set = sorted(set(map(lambda x: x.system_name, self.mission_queue)))
 
         mission_dict = {}
