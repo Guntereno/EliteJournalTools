@@ -147,13 +147,16 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
     #     "SharedWithOthers":2
     # }
     def handle_bounty(self, event):
+        handled_factions = set()
         for mission in self.mission_queue:
             faction = event['VictimFaction']
             if mission.target_faction != faction:
                 continue
+            if mission.giving_faction in handled_factions:
+                continue
             if mission.kill_count > 0:
-                mission.kill_count = mission.kill_count - 1
-                break
+                mission.kill_count -= 1
+                handled_factions.add(mission.giving_faction)
 
     def __init__(self):
         self.register_handler("Missions", self.handle_missions)
