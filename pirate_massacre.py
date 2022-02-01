@@ -328,17 +328,5 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
                     print('  - None')
             print()
 
-        # output_dict = {}
-        # for id in self.mission_dict:
-        #     mission = self.mission_dict[id]
-        #     faction = mission.giving_faction
-        #     if not faction in output_dict:
-        #         output_dict[faction] = []
-        #     output_dict[faction].append(mission)
-
-        # for key in sorted(output_dict.keys()):
-        #     for mission in output_dict[key]:
-        #         print(f'{mission.giving_faction}: {mission.kill_count}')
-
 if __name__ == "__main__":
     journal_scan.scan_journal(PirateMassacreScanner())
