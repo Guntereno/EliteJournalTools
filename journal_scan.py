@@ -1,6 +1,7 @@
 import argparse
 import os
 import json
+import traceback
 from dateutil import parser as date_parser
 from pytz import UTC
 
@@ -60,7 +61,8 @@ def parse_files(scanner, start_date, end_date):
                             raise e
 
             except Exception as e:
-                print("Error loading file '" + filename + "': " + str(e))
+                print("Error loading file '" + filename + "': ")
+                traceback.print_exc()
                 return
 
     scanner.finalise()
