@@ -8,14 +8,24 @@ class MissionInfo:
     total_kills = -1
     system_name = None
     description = None
+    reward = -1
 
-    def __init__(self, id, giving_faction, target_faction, kill_count, system_name, description):
+    def __init__(
+        self,
+        id,
+        giving_faction,
+        target_faction,
+        kill_count,
+        system_name,
+        description,
+        reward):
         self.id = id
         self.giving_faction = giving_faction
         self.target_faction = target_faction
         self.remaining_kills = self.total_kills = kill_count
         self.system_name = system_name
         self.description = description
+        self.reward = reward
 class SystemInfo:
     name = None
     factions = None
@@ -88,7 +98,8 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
                 event['TargetFaction'],
                 event['KillCount'],
                 self.current_system,
-                event['LocalisedName'])
+                event['LocalisedName'],
+                event['Reward'])
             self.add_mission(id, mission)
 
     # {
@@ -330,7 +341,12 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
                 if system_faction in mission_dict:
                     for mission in mission_dict[system_faction]:
                         kills = mission.total_kills - mission.remaining_kills
-                        print(f'  - {mission.description}: {kills}/{mission.total_kills} ({mission.remaining_kills} remain)')
+                        message = '  - {} for {:,} credits:'.format(mission.description, mission.reward)
+                        if mission.remaining_kills > 0:
+                            message += f' {kills}/{mission.total_kills} ({mission.remaining_kills} remain)'
+                        else:
+                            message += ' DONE!'
+                        print(message)
                 else:
                     # Maybe we have missions in other systems?
                     has_missions_in_other_system = False
