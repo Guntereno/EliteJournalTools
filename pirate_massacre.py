@@ -323,9 +323,22 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
                 print(f'## {faction_name}')
                 if system_faction in mission_dict:
                     for mission in mission_dict[system_faction]:
-                        print(f'  - {mission.description}: {mission.remaining_kills}/{mission.total_kills} remaining')
+                        kills = mission.total_kills - mission.remaining_kills
+                        print(f'  - {mission.description}: {kills}/{mission.total_kills} ({mission.remaining_kills} remain)')
                 else:
-                    print('  - None')
+                    # Maybe we have missions in other systems?
+                    has_missions_in_other_system = False
+                    for other_system_name in system_set:
+                        if other_system_name == system_name:
+                            continue
+                        other_system_faction = (other_system_name, faction_name)
+                        if other_system_faction in mission_dict:
+                            has_missions_in_other_system = True
+                            break
+                    if has_missions_in_other_system:
+                        print('  - None (have mission in other system)')
+                    else:
+                        print('  - None')
             print()
 
 if __name__ == "__main__":
