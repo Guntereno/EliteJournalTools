@@ -320,7 +320,7 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
         self.register_handler("FSDJump", self.handle_fsd_jump)
         self.register_handler("Location", self.handle_location)
 
-    def finalise(self):
+    def output_report(self):
 
         print(f'Currently tracking {len(self.mission_queue)}/20 missions.')
         print()
@@ -368,4 +368,6 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
 if __name__ == "__main__":
     # Wing missions last around 5 days, so we only need to scan that far back
     start_date = datetime.datetime.now(UTC) - datetime.timedelta(6)
-    journal_scan.parse_files(PirateMassacreScanner(), start_date, None)
+    scanner = PirateMassacreScanner()
+    journal_scan.scan_journal_files_in_date_range(scanner, start_date, None)
+    scanner.output_report()

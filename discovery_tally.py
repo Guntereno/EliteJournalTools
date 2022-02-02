@@ -28,9 +28,11 @@ class DiscoveryScanner(journal_scan.JournalScanner):
     def __init__(self):
         self.register_handler("Scan", self.handle_scan)
 
-    def finalise(self):
+    def output_report(self):
         for key, value in sorted(self.body_counts.items()):
             print(f"{key}:{value}")
 
 if __name__ == "__main__":
-    journal_scan.scan_journal(DiscoveryScanner())
+    scanner = DiscoveryScanner()
+    journal_scan.scan_journal(scanner)
+    scanner.output_report()

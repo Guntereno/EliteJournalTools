@@ -10,8 +10,10 @@ class AstrasHeartsScanner(journal_scan.JournalScanner):
     def __init__(self):
         self.register_handler("MarketSell", self.handle_market_sell)
 
-    def finalise(self):
+    def output_report(self):
         print(self.hearts_sold)
 
 if __name__ == "__main__":
-    journal_scan.scan_journal(AstrasHeartsScanner())
+    scanner = AstrasHeartsScanner()
+    journal_scan.scan_journal(scanner)
+    scanner.output_report()

@@ -1,11 +1,13 @@
 import argparse
 import json
 import os
-import re
 import traceback
 from datetime import datetime
 from dateutil import parser as date_parser
 from pytz import UTC
+
+data_path = os.path.expanduser("~/Saved Games/Frontier Developments/Elite Dangerous")
+os.chdir(data_path)
 
 class JournalScanner:
     event_handlers = {}
@@ -18,9 +20,15 @@ class JournalScanner:
         if event_id in self.event_handlers:
             self.event_handlers[event_id](event)
 
-    def finalise(self):
-        pass
+class BookMark:
+    filename = None
+    line_number = -1
+    line_hash = None
 
+    def __init__(self, filename, line_number, line_hash) -> None:
+        self.filename = filename
+        self.line_number = line_number
+        self.line_hash = line_hash
 
 def init_argparse():
     parser = argparse.ArgumentParser(
@@ -33,48 +41,81 @@ def init_argparse():
 
     return parser
 
-def include_journal_file(file_name, start_file, end_file):
-    if not file_name.startswith('Journal.'):
+def include_journal_file(filename):
+    if not filename.startswith('Journal.'):
         return False
-    if not file_name.endswith('.log'):
-        return False
-    if (start_file is not None) and (file_name < start_file):
-        return False
-    if (end_file is not None) and (file_name > end_file):
+    if not filename.endswith('.log'):
         return False
     return True
 
+def get_journal_file_list():
+    all_files = os.listdir(data_path)
+    return filter(lambda f: include_journal_file(f), all_files)
 
-def parse_files(scanner, start_date, end_date):
+def scan_file(filename, scanner, book_mark=None):
     if not isinstance(scanner, JournalScanner):
         raise Exception("'scanner' parameter is not a JournalScanner!")
 
-    data_path = os.path.expanduser("~/Saved Games/Frontier Developments/Elite Dangerous")
-    os.chdir(data_path)
+    try:
+        with open(filename, encoding='utf-8') as file_ptr:
+            lines = file_ptr.readlines()
 
+            start_line = 0
+            if book_mark is not None:
+                last_line = lines[book_mark.line_number]
+                if (hash(last_line) != book_mark.line_hash) or (filename != book_mark.filename):
+                    raise Exception("Attempting to resume from invalid book mark!")
+                start_line = book_mark.line_number
+
+            for line_num in range(start_line, len(lines)):
+                line = lines[line_num]
+                event = json.loads(line)
+                try:
+                    scanner.handle_event(event)
+                except Exception as e:
+                    print(f"Error parsing event:\nEvent={event}")
+                    raise e
+
+            last_line_num = len(lines)-1
+            last_line = lines[last_line_num]
+            return BookMark(filename, len(lines), hash(last_line))
+
+    except Exception as e:
+        print("Error loading file '" + filename + "': ")
+        traceback.print_exc()
+        return None
+
+def scan_files(scanner, filenames):
+    book_mark = None
+    for filename in filenames:
+        book_mark = scan_file(filename, scanner)
+    return book_mark
+
+def file_in_file_range(file, start_file, end_file):
+    if (start_file is not None) and (file < start_file):
+        return False
+    if (end_file is not None) and (file > end_file):
+        return False
+    return True
+
+def scan_files_in_file_range(scanner, start_file, end_file):
+    files_in_range = filter(lambda f: file_in_file_range(f, start_file, end_file), get_journal_file_list())
+    return scan_files(scanner, files_in_range)
+
+def scan_journal_files_in_date_range(scanner, start_date, end_date):
     date_format = 'Journal.%y%m%d%H%M%S.01.log'
     start_file = None if start_date is None else start_date.strftime(date_format)
     end_file = None if end_date is None else end_date.strftime(date_format)
+    return scan_files_in_file_range(scanner, start_file, end_file)
 
-    all_files = os.listdir(data_path)
-    filtered_files = filter(lambda f: include_journal_file(f, start_file, end_file), all_files)
-    for filename in filtered_files:
-        try:
-            with open(filename, encoding='utf-8') as file_ptr:
-                for cnt, line in enumerate(file_ptr):
-                    event = json.loads(line)
-                    try:
-                        scanner.handle_event(event)
-                    except Exception as e:
-                        print(f"Error parsing event:\nEvent={event}")
-                        raise e
-
-        except Exception as e:
-            print("Error loading file '" + filename + "': ")
-            traceback.print_exc()
-            return
-
-    scanner.finalise()
+def resume_from_book_mark(scanner, book_mark):
+    file_names = get_journal_file_list()
+    last_file_index = file_names.index(book_mark.filename)
+    # Scan the first file
+    scan_file(file_names[last_file_index], scanner, book_mark)
+    # Scan remaining files
+    remaining_files = file_names[last_file_index:len(file_names)]
+    return scan_files_in_file_range(scanner, book_mark.filename, None)
 
 def scan_journal(scanner):
     args_parser = init_argparse()
@@ -90,7 +131,7 @@ def scan_journal(scanner):
         end_date = UTC.localize(date_parser.parse(args.end_date))
         print(f"Using end date: {end_date}")
 
-    parse_files(scanner, start_date, end_date)
+    scan_journal_files_in_date_range(scanner, start_date, end_date)
 
 if __name__ == "__main__":
     # Simple scanner which prints all recvieved text as a test

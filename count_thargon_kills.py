@@ -29,7 +29,7 @@ class ThargonKillScanner(journal_scan.JournalScanner):
         self.register_handler("WingLeave", self.handle_wing_leave)
         self.register_handler("FactionKillBond", self.handle_faction_kill_bond)
 
-    def finalise(self):
+    def output_report(self):
         key_set = set(list(self.solo_counts.keys()) + list(self.wing_counts.keys()))
 
         thargoid_name_by_reward = {
@@ -57,4 +57,6 @@ class ThargonKillScanner(journal_scan.JournalScanner):
             print(f"{name}: {solo_count} solo, {wing_count} in wing.")
 
 if __name__ == "__main__":
-    journal_scan.scan_journal(ThargonKillScanner())
+    scanner = ThargonKillScanner()
+    journal_scan.scan_journal(scanner)
+    scanner.output_report()

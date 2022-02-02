@@ -25,7 +25,7 @@ class BondScanner(journal_scan.JournalScanner):
         self.register_handler("RedeemVoucher", self.handle_redeem_voucher)
         self.register_handler("Location", self.handle_location)
 
-    def finalise(self):
+    def output_report(self):
         for date,entries in self.totals.items():
             print(str(date) + ":")
             for system,amount in entries.items():
@@ -33,4 +33,6 @@ class BondScanner(journal_scan.JournalScanner):
             print()
 
 if __name__ == "__main__":
-    journal_scan.scan_journal(BondScanner())
+    scanner = BondScanner()
+    journal_scan.scan_journal(scanner)
+    scanner.output_report()
