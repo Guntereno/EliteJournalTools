@@ -34,7 +34,7 @@ class PirateMassacreServer(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/mission_report":
             self.send_mission_report()
-        if self.path == "/":
+        elif self.path == "/":
             self.send_file("/index.htm")
         else:
             self.send_file(self.path)

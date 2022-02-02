@@ -109,6 +109,8 @@ def scan_journal_files_in_date_range(scanner, start_date, end_date):
     return scan_files_in_file_range(scanner, start_file, end_file)
 
 def resume_from_book_mark(scanner, book_mark):
+    if book_mark is None:
+        return
     file_names = get_journal_file_list()
     last_file_index = file_names.index(book_mark.filename)
     # Scan the first file
