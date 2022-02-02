@@ -50,7 +50,7 @@ def include_journal_file(filename):
 
 def get_journal_file_list():
     all_files = os.listdir(data_path)
-    return filter(lambda f: include_journal_file(f), all_files)
+    return list(filter(lambda f: include_journal_file(f), all_files))
 
 def scan_file(filename, scanner, book_mark=None):
     if not isinstance(scanner, JournalScanner):
@@ -65,7 +65,7 @@ def scan_file(filename, scanner, book_mark=None):
                 last_line = lines[book_mark.line_number]
                 if (hash(last_line) != book_mark.line_hash) or (filename != book_mark.filename):
                     raise Exception("Attempting to resume from invalid book mark!")
-                start_line = book_mark.line_number
+                start_line = book_mark.line_number + 1
 
             for line_num in range(start_line, len(lines)):
                 line = lines[line_num]
@@ -78,7 +78,7 @@ def scan_file(filename, scanner, book_mark=None):
 
             last_line_num = len(lines)-1
             last_line = lines[last_line_num]
-            return BookMark(filename, len(lines), hash(last_line))
+            return BookMark(filename, last_line_num, hash(last_line))
 
     except Exception as e:
         print("Error loading file '" + filename + "': ")
@@ -112,10 +112,13 @@ def resume_from_book_mark(scanner, book_mark):
     file_names = get_journal_file_list()
     last_file_index = file_names.index(book_mark.filename)
     # Scan the first file
-    scan_file(file_names[last_file_index], scanner, book_mark)
+    book_mark = scan_file(file_names[last_file_index], scanner, book_mark)
     # Scan remaining files
-    remaining_files = file_names[last_file_index:len(file_names)]
-    return scan_files_in_file_range(scanner, book_mark.filename, None)
+    remaining_files = file_names[(last_file_index+1):len(file_names)]
+    if(len(remaining_files) > 0):
+        return scan_files(scanner, remaining_files)
+    else:
+        return book_mark
 
 def scan_journal(scanner):
     args_parser = init_argparse()
@@ -131,7 +134,7 @@ def scan_journal(scanner):
         end_date = UTC.localize(date_parser.parse(args.end_date))
         print(f"Using end date: {end_date}")
 
-    scan_journal_files_in_date_range(scanner, start_date, end_date)
+    return scan_journal_files_in_date_range(scanner, start_date, end_date)
 
 if __name__ == "__main__":
     # Simple scanner which prints all recvieved text as a test
