@@ -52,9 +52,6 @@ def parse_files(scanner, start_date, end_date):
     data_path = os.path.expanduser("~/Saved Games/Frontier Developments/Elite Dangerous")
     os.chdir(data_path)
 
-    # e.g., 'Journal.220201192604.01.log'
-    date_re = re.compile('^Journal.(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)\.\d\d\.log$')
-
     date_format = 'Journal.%y%m%d%H%M%S.01.log'
     start_file = None if start_date is None else start_date.strftime(date_format)
     end_file = None if end_date is None else end_date.strftime(date_format)
@@ -62,24 +59,20 @@ def parse_files(scanner, start_date, end_date):
     all_files = os.listdir(data_path)
     filtered_files = filter(lambda f: include_journal_file(f, start_file, end_file), all_files)
     for filename in filtered_files:
-        date_match = date_re.match(filename)
-        if date_match:
-            try:
-                with open(filename, encoding='utf-8') as file_ptr:
+        try:
+            with open(filename, encoding='utf-8') as file_ptr:
+                for cnt, line in enumerate(file_ptr):
+                    event = json.loads(line)
+                    try:
+                        scanner.handle_event(event)
+                    except Exception as e:
+                        print(f"Error parsing event:\nEvent={event}")
+                        raise e
 
-                    for cnt, line in enumerate(file_ptr):
-                        event = json.loads(line)
-
-                        try:
-                            scanner.handle_event(event)
-                        except Exception as e:
-                            print(f"Error parsing event:\nEvent={event}")
-                            raise e
-
-            except Exception as e:
-                print("Error loading file '" + filename + "': ")
-                traceback.print_exc()
-                return
+        except Exception as e:
+            print("Error loading file '" + filename + "': ")
+            traceback.print_exc()
+            return
 
     scanner.finalise()
 
