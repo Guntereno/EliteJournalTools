@@ -24,5 +24,13 @@
             "console": "integratedTerminal",
             "args": ["-s", "29/01/22"]
         },
+        {
+            "name": "Remote",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["--remote"]
+        }
     ]
 }

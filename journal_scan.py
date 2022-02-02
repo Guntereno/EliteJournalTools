@@ -59,6 +59,8 @@ def scan_file(filename, scanner, book_mark=None):
     try:
         with open(filename, encoding='utf-8') as file_ptr:
             lines = file_ptr.readlines()
+            if(len(lines) == 0):
+                return None
 
             start_line = 0
             if book_mark is not None:

@@ -1,13 +1,14 @@
-from posixpath import relpath
+import argparse
+import datetime
 import journal_scan
 import os
 import pirate_massacre
 import threading
 import time
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-host_name = "localhost"
-server_port = 8080
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from posixpath import relpath
+from pytz import UTC
 
 public_path = os.path.join(os.path.dirname(
     os.path.realpath(__file__)), "Public")
@@ -107,15 +108,34 @@ def start_web_server(host_name, server_port, PirateMassacreServer):
     print("Started server at http://%s:%s" % (host_name, server_port))
 
 def main_loop():
-    book_mark = journal_scan.scan_journal(scanner)
+    global mutex
+    mutex.acquire()
+    # Wing missions last around 5 days, so we only need to scan that far back
+    start_date = datetime.datetime.now(UTC) - datetime.timedelta(6)
+    book_mark = journal_scan.scan_journal_files_in_date_range(scanner, start_date, None)
+    mutex.release()
     while True:
-        global mutex
+        time.sleep(0.5)
         mutex.acquire()
         book_mark = journal_scan.resume_from_book_mark(scanner, book_mark)
         mutex.release()
-        time.sleep(0.5)
+
+def init_argparse():
+    parser = argparse.ArgumentParser(
+        usage="%(prog)s [OPTION] function",
+        description="Run a web server showing a live stream of your pirate massacre missions grouped by system."
+    )
+
+    parser.add_argument("-r", "--remote", action='store_true', help="Allow for remote access (rather than localhost).")
+
+    return parser
 
 if __name__ == "__main__":
+    args_parser = init_argparse()
+    args = args_parser.parse_args()
+
+    host_name = "" if args.remote else "localhost"
+    server_port = 8080
     start_web_server(host_name, server_port, PirateMassacreServer)
     main_loop()
 
