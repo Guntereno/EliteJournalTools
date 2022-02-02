@@ -320,13 +320,10 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
         self.register_handler("FSDJump", self.handle_fsd_jump)
         self.register_handler("Location", self.handle_location)
 
-    def output_report(self):
-
-        print(f'Currently tracking {len(self.mission_queue)}/20 missions.')
-        print()
-
+    def build_report(self):
         system_set = sorted(set(map(lambda x: x.system_name, self.mission_queue)))
 
+        # Create dictionary of system & faction tuple to array of missions
         mission_dict = {}
         for mission in self.mission_queue:
             system_faction = (mission.system_name, mission.giving_faction)
@@ -334,14 +331,53 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
                 mission_dict[system_faction] = []
             mission_dict[system_faction].append(mission)
 
+        systems = []
         for system_name in sorted(system_set):
-            print(f'# {system_name}')
+            system = {}
+            system['Name'] = system_name
+            system['Factions'] = []
             system_info = self.system_dict[system_name]
             for faction_name in sorted(system_info.factions):
                 system_faction = (system_name, faction_name)
-                print(f'## {faction_name}')
+                faction = {}
+                faction['Name'] = faction_name
+                faction['Missions'] = []
                 if system_faction in mission_dict:
                     for mission in mission_dict[system_faction]:
+                        faction['Missions'].append(mission)
+                has_missions_in_other_system = False
+                for other_system_name in system_set:
+                    if other_system_name == system_name:
+                        continue
+                    other_system_faction = (other_system_name, faction_name)
+                    if other_system_faction in mission_dict:
+                        has_missions_in_other_system = True
+                        break
+                faction['HasMissionsInOtherSystem'] = has_missions_in_other_system
+                system['Factions'].append(faction)
+            systems.append(system)
+
+        report = {}
+        report['Systems'] = systems
+        report['MissionCount'] = len(self.mission_queue)
+
+        return report
+
+
+    def output_report(self):
+        report = self.build_report()
+        print(f'Currently tracking {report["MissionCount"]}/20 missions.')
+        print()
+
+        system_set = sorted(set(map(lambda x: x.system_name, self.mission_queue)))
+
+        for system in report['Systems']:
+            print(f'# {system["Name"]}')
+            for faction in system["Factions"]:
+                print(f'## {faction["Name"]}')
+                missions = faction["Missions"]
+                if len(missions) > 0:
+                    for mission in missions:
                         kills = mission.total_kills - mission.remaining_kills
                         message = '  - {} for {:,} credits:'.format(mission.description, mission.reward)
                         if mission.remaining_kills > 0:
@@ -350,16 +386,7 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
                             message += ' DONE!'
                         print(message)
                 else:
-                    # Maybe we have missions in other systems?
-                    has_missions_in_other_system = False
-                    for other_system_name in system_set:
-                        if other_system_name == system_name:
-                            continue
-                        other_system_faction = (other_system_name, faction_name)
-                        if other_system_faction in mission_dict:
-                            has_missions_in_other_system = True
-                            break
-                    if has_missions_in_other_system:
+                    if faction['HasMissionsInOtherSystem']:
                         print('  - None (have mission in other system)')
                     else:
                         print('  - None')
