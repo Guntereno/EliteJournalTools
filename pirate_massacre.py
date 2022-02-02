@@ -1,4 +1,6 @@
+import datetime
 import journal_scan
+from pytz import UTC
 
 class MissionInfo:
     id = None
@@ -364,4 +366,6 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
             print()
 
 if __name__ == "__main__":
-    journal_scan.scan_journal(PirateMassacreScanner())
+    # Wing missions last around 5 days, so we only need to scan that far back
+    start_date = datetime.datetime.now(UTC) - datetime.timedelta(6)
+    journal_scan.parse_files(PirateMassacreScanner(), start_date, None)
