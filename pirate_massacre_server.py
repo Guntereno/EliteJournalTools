@@ -28,7 +28,7 @@ class PirateMassacreHandler(web_server.Handler):
 
         content = ""
 
-        content += f'<div class ="MissionCount">Currently tracking {report["MissionCount"]}/20 missions.</div>'
+        content += f'<div class ="MissionCount">Currently tracking {report["MissionCount"]}/20 missions for a potential {"{:,}".format(report["TotalReward"])} credit reward.</div>'
         for system in report['Systems']:
             content += (f'<div class="SystemHeader">{system["Name"]}</div>')
             for faction in system["Factions"]:

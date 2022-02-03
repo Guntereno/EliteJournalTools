@@ -325,11 +325,13 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
 
         # Create dictionary of system & faction tuple to array of missions
         mission_dict = {}
+        total_reward = 0
         for mission in self.mission_queue:
             system_faction = (mission.system_name, mission.giving_faction)
             if not system_faction in mission_dict:
                 mission_dict[system_faction] = []
             mission_dict[system_faction].append(mission)
+            total_reward += mission.reward
 
         systems = []
         for system_name in sorted(system_set):
@@ -360,6 +362,7 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
         report = {}
         report['Systems'] = systems
         report['MissionCount'] = len(self.mission_queue)
+        report['TotalReward'] = total_reward
 
         return report
 
