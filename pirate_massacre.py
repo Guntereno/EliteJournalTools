@@ -321,7 +321,9 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
         self.register_handler("Location", self.handle_location)
 
     def build_report(self):
-        system_set = sorted(set(map(lambda x: x.system_name, filter(lambda x: x is not None, self.mission_queue))))
+        system_set = filter(lambda x: (x is not None) and (x.system_name is not None), self.mission_queue)
+        system_set = map(lambda x: x.system_name, system_set)
+        system_set = sorted(set(system_set))
 
         # Create dictionary of system & faction tuple to array of missions
         mission_dict = {}
