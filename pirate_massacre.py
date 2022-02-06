@@ -321,7 +321,7 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
         self.register_handler("Location", self.handle_location)
 
     def build_report(self):
-        system_set = sorted(set(map(lambda x: x.system_name, self.mission_queue)))
+        system_set = sorted(set(map(lambda x: x.system_name, filter(lambda x: x is not None, self.mission_queue))))
 
         # Create dictionary of system & faction tuple to array of missions
         mission_dict = {}
@@ -369,7 +369,7 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
 
     def output_report(self):
         report = self.build_report()
-        print(f'Currently tracking {report["MissionCount"]}/20 missions.')
+        print(f'Currently tracking {report["MissionCount"]}/20 missions for a total reward of {report["TotalReward"]}.')
         print()
 
         system_set = sorted(set(map(lambda x: x.system_name, self.mission_queue)))

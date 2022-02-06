@@ -13,7 +13,7 @@ mutex = threading.Lock()
 
 # There appears to be a bug in the bookmark system. Until that's fixed we'll rebuild
 # the complete scanner every time a request is made
-rebuild_scanner_on_request = True
+rebuild_scanner_on_request = False
 
 class PirateMassacreHandler(web_server.Handler):
     def get_handler(self, request):
