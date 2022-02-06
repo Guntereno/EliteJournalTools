@@ -70,7 +70,7 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
                     id = mission['MissionID']
                     # We only want to add missions we're not already tracking
                     if not id in self.mission_dict:
-                        self.add_mission(id, MissionInfo(id, None, -1, None))
+                        self.add_mission(id, MissionInfo(id, None, -1, None, None, None, None))
 
     # {
     #     "timestamp": "2022-01-31T20:29:33Z",
