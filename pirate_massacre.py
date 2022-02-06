@@ -333,7 +333,8 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
             if not system_faction in mission_dict:
                 mission_dict[system_faction] = []
             mission_dict[system_faction].append(mission)
-            total_reward += mission.reward
+            if mission.reward is not None:
+                total_reward += mission.reward
 
         systems = []
         for system_name in sorted(system_set):
