@@ -375,8 +375,6 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
         print(f'Currently tracking {report["MissionCount"]}/20 missions for a total reward of {report["TotalReward"]}.')
         print()
 
-        system_set = sorted(set(map(lambda x: x.system_name, self.mission_queue)))
-
         for system in report['Systems']:
             print(f'# {system["Name"]}')
             for faction in system["Factions"]:
