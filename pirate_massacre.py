@@ -397,8 +397,8 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
             print()
 
 if __name__ == "__main__":
-    # Wing missions last around 5 days, so we only need to scan that far back
-    start_date = datetime.datetime.now(UTC) - datetime.timedelta(6)
+    # Wing missions last around 7 days, so we only need to scan that far back
+    start_date = datetime.datetime.now(UTC) - datetime.timedelta(8)
     scanner = PirateMassacreScanner()
     journal_scan.scan_journal_files_in_date_range(scanner, start_date, None)
     scanner.output_report()

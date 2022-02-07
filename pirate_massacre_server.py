@@ -81,9 +81,9 @@ def main_loop(book_mark):
 def build_scanner():
     global scanner
 
-    # Wing missions last around 5 days, so we only need to scan that far back
+    # Wing missions last around 7 days, so we only need to scan that far back
     scanner = pirate_massacre.PirateMassacreScanner()
-    start_date = datetime.datetime.now(UTC) - datetime.timedelta(6)
+    start_date = datetime.datetime.now(UTC) - datetime.timedelta(8)
     book_mark = journal_scan.scan_journal_files_in_date_range(scanner, start_date, None)
     return book_mark
 
