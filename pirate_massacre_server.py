@@ -68,7 +68,7 @@ class PirateMassacreHandler(web_server.Handler):
                         kills = mission.total_kills - mission.remaining_kills
                         content += '<div class="Mission">'
 
-                        message = '{} for {:,} credits'.format(mission.description, mission.reward)
+                        message = 'Kill {} for {:,} credits'.format(mission.target_faction, mission.reward)
                         message += ' &mdash; '
 
                         if mission.remaining_kills > 0:
