@@ -24,7 +24,7 @@ body{
 
 #Wrap
 {
-	width:800px;
+	width:900px;
 	margin: 0 auto;
 	color:rgb(176, 174, 172);
 	background-color:rgb(16,16,16);
@@ -42,15 +42,15 @@ body{
 {
     padding:20px 10px 5px 3px;
 	font-weight:bold;
-	font-size:1.6em;
+	font-size:1.4em;
 	color:rgb(255,255,225);
 }
 
 .FactionHeader
 {
-	padding: 0px 10px 0px 20px;
-	font-size: 1.4em;
-	font-weight: bold;
+	padding: 5px 10px 0px 20px;
+	font-size: 1.2em;
+	font-weight: 400;
 	color:rgb(255,255,255);
 	margin-bottom: 2px;
 }
@@ -58,8 +58,17 @@ body{
 .Mission
 {
 	padding:0px 40px;
-	font-size: 1.4em;
+	font-size: 1.0em;
 	color:rgb(170,170,170);
 	margin-bottom: 2px;
 }
 
+em.Expiry
+{
+	color: rgb(200, 0, 0)
+}
+
+em.Done
+{
+	color: rgb(0, 200, 0)
+}

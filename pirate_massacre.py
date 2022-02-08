@@ -1,26 +1,30 @@
 import datetime
+import dateutil
 import journal_scan
 from pytz import UTC
+
 
 class MissionInfo:
     id = None
     giving_faction = None
     target_faction = None
-    remaining_kills = -1
-    total_kills = -1
+    remaining_kills = None
+    total_kills = None
     system_name = None
     description = None
-    reward = -1
+    reward = None
+    expiry = None
 
     def __init__(
-        self,
-        id,
-        giving_faction,
-        target_faction,
-        kill_count,
-        system_name,
-        description,
-        reward):
+            self,
+            id=None,
+            giving_faction=None,
+            target_faction=None,
+            kill_count=None,
+            system_name=None,
+            description=None,
+            reward=None,
+            expiry=None):
         self.id = id
         self.giving_faction = giving_faction
         self.target_faction = target_faction
@@ -28,6 +32,9 @@ class MissionInfo:
         self.system_name = system_name
         self.description = description
         self.reward = reward
+        self.expiry = expiry
+
+
 class SystemInfo:
     name = None
     factions = None
@@ -36,8 +43,11 @@ class SystemInfo:
         self.name = name
         self.factions = factions
 
+
 def is_wing_massacre(mission_name):
     return mission_name.startswith('Mission_MassacreWing')
+
+
 class PirateMassacreScanner(journal_scan.JournalScanner):
     mission_queue = []
     mission_dict = {}
@@ -59,7 +69,7 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
     #     "event":"Missions",
     #     "Active":
     #     [
-    #         { "MissionID":842001573, "Name":"Mission_MassacreWing_name", "PassengerMission":false, "Expires":0 }, 
+    #         { "MissionID":842001573, "Name":"Mission_MassacreWing_name", "PassengerMission":false, "Expires":0 },
     #         ...
     #     ]
     # }
@@ -70,7 +80,7 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
                     id = mission['MissionID']
                     # We only want to add missions we're not already tracking
                     if not id in self.mission_dict:
-                        self.add_mission(id, MissionInfo(id, None, -1, None, None, None, None))
+                        self.add_mission(id, MissionInfo(id=id))
 
     # {
     #     "timestamp": "2022-01-31T20:29:33Z",
@@ -94,14 +104,19 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
     def handle_mission_accepted(self, event):
         if is_wing_massacre(event['Name']):
             id = event['MissionID']
-            mission =  MissionInfo(
-                id,
-                event['Faction'],
-                event['TargetFaction'],
-                event['KillCount'],
-                self.current_system,
-                event['LocalisedName'],
-                event['Reward'])
+
+            expiry = dateutil.parser.isoparse(event['Expiry'])
+
+            mission = MissionInfo(
+                id=id,
+                giving_faction=event['Faction'],
+                target_faction=event['TargetFaction'],
+                kill_count=event['KillCount'],
+                system_name=self.current_system,
+                description=event['LocalisedName'],
+                reward=event['Reward'],
+                expiry=expiry)
+
             self.add_mission(id, mission)
 
     # {
@@ -163,7 +178,7 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
     def handle_mission_completed(self, event):
         self.remove_mission(event['MissionID'])
 
-    #{
+    # {
     #     "timestamp":"2022-01-31T21:14:38Z",
     #     "event":"Bounty",
     #     "Rewards":[ { "Faction":"Brazilian League of Pilots", "Reward":212922 } ],
@@ -308,20 +323,24 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
             return
         if 'Factions' in event:
             faction_names = list(map(lambda x: x['Name'], event['Factions']))
-            self.system_dict[system_name] = SystemInfo(self.current_system, faction_names)
+            self.system_dict[system_name] = SystemInfo(
+                self.current_system, faction_names)
 
     def __init__(self):
         self.register_handler("Missions", self.handle_missions)
         self.register_handler("MissionAccepted", self.handle_mission_accepted)
-        self.register_handler("MissionAbandoned", self.handle_mission_abandoned)
+        self.register_handler("MissionAbandoned",
+                              self.handle_mission_abandoned)
         self.register_handler("MissionFailed", self.handle_mission_failed)
-        self.register_handler("MissionCompleted", self.handle_mission_completed)
+        self.register_handler("MissionCompleted",
+                              self.handle_mission_completed)
         self.register_handler("Bounty", self.handle_bounty)
         self.register_handler("FSDJump", self.handle_fsd_jump)
         self.register_handler("Location", self.handle_location)
 
     def build_report(self):
-        system_set = filter(lambda x: (x is not None) and (x.system_name is not None), self.mission_queue)
+        system_set = filter(lambda x: (x is not None) and (
+            x.system_name is not None), self.mission_queue)
         system_set = map(lambda x: x.system_name, system_set)
         system_set = sorted(set(system_set))
 
@@ -369,10 +388,10 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
 
         return report
 
-
     def output_report(self):
         report = self.build_report()
-        print(f'Currently tracking {report["MissionCount"]}/20 missions for a total reward of {report["TotalReward"]}.')
+        print(
+            f'Currently tracking {report["MissionCount"]}/20 missions for a total reward of {report["TotalReward"]}.')
         print()
 
         for system in report['Systems']:
@@ -383,7 +402,8 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
                 if len(missions) > 0:
                     for mission in missions:
                         kills = mission.total_kills - mission.remaining_kills
-                        message = '  - {} for {:,} credits:'.format(mission.description, mission.reward)
+                        message = '  - {} for {:,} credits:'.format(
+                            mission.description, mission.reward)
                         if mission.remaining_kills > 0:
                             message += f' {kills}/{mission.total_kills} ({mission.remaining_kills} remain)'
                         else:
@@ -395,6 +415,7 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
                     else:
                         print('  - None')
             print()
+
 
 if __name__ == "__main__":
     # Wing missions last around 7 days, so we only need to scan that far back

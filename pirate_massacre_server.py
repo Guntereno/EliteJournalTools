@@ -15,6 +15,25 @@ mutex = threading.Lock()
 # the complete scanner every time a request is made
 rebuild_scanner_on_request = False
 
+def strfdelta(tdelta, fmt):
+    d = {"days": tdelta.days}
+    d["hours"], rem = divmod(tdelta.seconds, 3600)
+    d["minutes"], d["seconds"] = divmod(rem, 60)
+    return fmt.format(**d)
+
+def build_remaining_time_str(expiry):
+    now = UTC.localize(datetime.datetime.utcnow())
+    if(expiry < now):
+        return '<em class="expiry">EXPIRED!</em>'
+    else:
+        message = "Expires in "
+        remaining = expiry - now
+        if remaining.days > 0:
+            message += strfdelta(remaining, '{days}D {hours}H {minutes}MIN')
+        else:
+            message += strfdelta(remaining, '{hours}H {minutes}MIN')
+        return message
+
 class PirateMassacreHandler(web_server.Handler):
     def get_handler(self, request):
         if request == "/mission_report":
@@ -48,11 +67,17 @@ class PirateMassacreHandler(web_server.Handler):
                     for mission in missions:
                         kills = mission.total_kills - mission.remaining_kills
                         content += '<div class="Mission">'
-                        message = '{} for {:,} credits:'.format(mission.description, mission.reward)
+
+                        message = '{} for {:,} credits'.format(mission.description, mission.reward)
+                        message += ' &mdash; '
+
                         if mission.remaining_kills > 0:
                             message += f' {kills}/{mission.total_kills} ({mission.remaining_kills} remain)'
+                            message += ' &mdash; '
+                            message += build_remaining_time_str(mission.expiry)
                         else:
-                            message += ' DONE!'
+                            message += ' <em class="Done">DONE!</em>'
+
                         content += message
                         content += '</div>'
                 else:
