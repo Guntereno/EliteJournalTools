@@ -9,6 +9,8 @@ from pytz import UTC
 data_path = os.path.expanduser("~/Saved Games/Frontier Developments/Elite Dangerous")
 os.chdir(data_path)
 
+cmdr_name = None
+
 class JournalScanner:
     event_handlers = {}
 
@@ -55,7 +57,6 @@ def get_journal_file_list():
 def scan_file(filename, scanner, book_mark=None):
     if not isinstance(scanner, JournalScanner):
         raise Exception("'scanner' parameter is not a JournalScanner!")
-
     try:
         with open(filename, encoding='utf-8') as file_ptr:
             lines = file_ptr.readlines()
@@ -72,6 +73,16 @@ def scan_file(filename, scanner, book_mark=None):
             for line_num in range(start_line, len(lines)):
                 line = lines[line_num]
                 event = json.loads(line)
+
+                # HACK: Only read events for the first CMDR encountered
+                global cmdr_name
+                if (event['event'] == 'Commander'):
+                    if (cmdr_name is None):
+                        cmdr_name = event['Name']
+                    else:
+                        if event['Name'] != cmdr_name:
+                            break
+
                 try:
                     scanner.handle_event(event)
                 except Exception as e:
