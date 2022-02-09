@@ -78,9 +78,15 @@ class PirateMassacreHandler(web_server.Handler):
             for faction_entry in system_entry["Factions"]:
                 faction_name = faction_entry['Name']
                 faction = report['Factions'][faction_name]
+
                 rep_string = faction.get_reputation_string()
                 rep_class = get_reputation_class(rep_string)
-                content += f'<div class="FactionHeader">{faction.name}<div class="{rep_class}">{rep_string}</div></div>'
+
+                icons = ""
+                if faction.government == 'Anarchy':
+                    icons += '&#x1F3F4;&#x200D;&#x2620;&#xFE0F;' # pirate flag
+                
+                content += f'<div class="FactionHeader">{faction.name}{icons}<div class="{rep_class}">{rep_string}</div></div>'
                 missions = faction_entry["Missions"]
                 if len(missions) > 0:
                     for mission in missions:
