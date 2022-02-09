@@ -2,6 +2,7 @@
     --color-positive: rgb(0, 167, 50);
     --color-neutral: rgb(224, 165, 0);
     --color-negative: rgba(200, 0, 0, 1);
+	--color-greyed: rgb(92, 92, 92);
 }
 
 html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, font, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td {
@@ -22,8 +23,7 @@ html {
 
 body {
 	font-family: Arial, Helvetica, sans-serif;
-	background-color: rgb(0, 0, 0);
-	color: rgb(255, 255, 255);
+	background-color: rgb(26, 26, 26);
 	font-size: 1em;
 	height: 100%;
 }
@@ -31,38 +31,42 @@ body {
 #Wrap {
 	width: 900px;
 	margin: 0 auto;
-	color: rgb(176, 174, 172);
+	color: rgb(221, 215, 210);
 	background-color: rgb(43, 43, 43);
 	border: 1px solid rgb(82, 82, 82);
 	border-radius: 15px;
-	padding: 30px 20px;
+	padding: 0px 0px;
 	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.6);
 }
 
 div.MissionCount {
-	color: rgb(170, 170, 170)
+	color: rgb(170, 170, 170);
+	padding: 10px 10px 0 10px;
 }
 
 div.SystemHeader {
-	padding: 20px 10px 5px 3px;
+	margin: 10px 0 0 0;
+	padding: 10px 10px 5px 10px;
 	font-weight: bold;
 	font-size: 1.4em;
-	color: rgb(255, 255, 225);
+	color: rgb(255, 255, 255);
+	background-color: rgb(202, 97, 11);
 }
 
 div.FactionHeader {
-	padding: 5px 10px 0px 20px;
+	margin: 0;
+	padding: 2px 10px 2px 20px;
 	font-size: 1.2em;
 	font-weight: 400;
 	color: rgb(255, 255, 255);
-	margin-bottom: 2px;
+	background-color: rgb(53, 53, 53);
 }
 
 div.Mission {
-	padding: 0px 40px;
+	margin: 0;
+	padding: 5px 10px 5px 40px;
 	font-size: 1.0em;
 	color: rgb(170, 170, 170);
-	margin-bottom: 2px;
 }
 
 em.Expiry {
@@ -104,4 +108,8 @@ em.Credits {
 	color: #dada7b;
 	font-style: normal;
 	text-shadow: 0 0 5px #ffff338a;
+}
+
+em.Greyed {
+	color: var(--color-greyed);
 }

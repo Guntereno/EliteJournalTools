@@ -106,11 +106,11 @@ class PirateMassacreHandler(web_server.Handler):
                         content += message
                         content += '</div>'
                 else:
-                    content += '<div class="Mission">'
+                    content += '<div class="Mission"><em class="Greyed">'
                     content += 'None'
                     if faction_entry['HasMissionsInOtherSystem']:
                         content +=' (have mission in other system)'
-                    content += '</div>'
+                    content += '</em></div>'
 
         self.wfile.write(bytes(content, "utf-8"))
 
