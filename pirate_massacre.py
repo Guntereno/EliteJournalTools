@@ -3,6 +3,7 @@ import dateutil
 import journal_scan
 from pytz import UTC
 
+
 class MissionInfo:
     id = None
     giving_faction = None
@@ -39,24 +40,29 @@ class SystemInfo:
     factions = None
 
     def __init__(
-        self,
-        name = None,
-        factions = None):
+            self,
+            name=None,
+            factions=None):
         self.name = name
         self.factions = factions
+
 
 class FactionInfo:
     name = None
     reputation = None
     government = None
+    state = None
+
     def __init__(
-        self,
-        name = None,
-        reputation = None,
-        government = None):
+            self,
+            name=None,
+            reputation=None,
+            government=None,
+            state=None):
         self.name = name
         self.reputation = reputation,
         self.government = government
+        self.state = state
 
     def get_reputation_string(self):
         if self.reputation == None:
@@ -66,7 +72,7 @@ class FactionInfo:
             return "HOSTILE"
         elif rep < -25.0:
             return "UNFRIENDLY"
-        elif rep <  25.0:
+        elif rep < 25.0:
             return "NEUTRAL"
         elif rep < 80.0:
             return "FRIENDLY"
@@ -76,6 +82,7 @@ class FactionInfo:
 
 def is_wing_massacre(mission_name):
     return mission_name.startswith('Mission_MassacreWing')
+
 
 class PirateMassacreScanner(journal_scan.JournalScanner):
     mission_queue = []
@@ -107,7 +114,8 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
         # Remove any tracked missions which aren't reported in this event.
         # (Clears up any which Elite didn't fire a MissionCompleted event for.)
         if event['Active']:
-            current_missions = set(map(lambda x: x['MissionID'], event['Active']))
+            current_missions = set(
+                map(lambda x: x['MissionID'], event['Active']))
             tracked_missions = list(self.mission_dict.keys())
             for mission_id in tracked_missions:
                 if mission_id not in current_missions:
@@ -282,9 +290,10 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
             for faction in event['Factions']:
                 faction_name = faction['Name']
                 faction = FactionInfo(
-                    name = faction_name,
-                    reputation = faction['MyReputation'],
-                    government = faction['Government'])
+                    name=faction_name,
+                    reputation=faction['MyReputation'],
+                    government=faction['Government'],
+                    state=faction['FactionState'])
                 self.faction_dict[faction_name] = faction
 
     # {
@@ -427,8 +436,10 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
         report['MissionsBySystem'] = missions_by_system
         report['MissionCount'] = len(self.mission_queue)
         report['TotalReward'] = total_reward
-        report['Systems'] = {system_name : self.system_dict[system_name] for system_name in system_set}
-        report['Factions'] = {faction_name : self.faction_dict[faction_name] for faction_name in faction_set}
+        report['Systems'] = {system_name: self.system_dict[system_name]
+                             for system_name in system_set}
+        report['Factions'] = {
+            faction_name: self.faction_dict[faction_name] for faction_name in faction_set}
 
         return report
 

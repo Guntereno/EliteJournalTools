@@ -85,7 +85,9 @@ class PirateMassacreHandler(web_server.Handler):
                 icons = ""
                 if faction.government == 'Anarchy':
                     icons += '&#x1F3F4;&#x200D;&#x2620;&#xFE0F;' # pirate flag
-                
+                if faction.state in ["War", "CivilWar"]:
+                    icons += '&#x2694;&#xFE0F;' # crossed swords
+
                 content += f'<div class="FactionHeader">{faction.name}{icons}<div class="{rep_class}">{rep_string}</div></div>'
                 missions = faction_entry["Missions"]
                 if len(missions) > 0:

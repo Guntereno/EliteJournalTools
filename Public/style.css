@@ -39,6 +39,11 @@ body {
 	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.6);
 }
 
+#Loading {
+	margin: 10px 10px 10px 10px;
+	text-align: center;
+}
+
 div.MissionCount {
 	color: rgb(170, 170, 170);
 	padding: 10px 10px 0 10px;
@@ -59,7 +64,7 @@ div.FactionHeader {
 	font-size: 1.2em;
 	font-weight: 400;
 	color: rgb(255, 255, 255);
-	background-color: rgb(53, 53, 53);
+	background-color: rgb(51, 51, 51);
 }
 
 div.Mission {
