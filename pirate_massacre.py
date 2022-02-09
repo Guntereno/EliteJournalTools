@@ -74,13 +74,14 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
     #     ]
     # }
     def handle_missions(self, event):
+        # Remove any tracked missions which aren't reported in this event.
+        # (Clears up any which Elite didn't fire a MissionCompleted event for.)
         if event['Active']:
-            for mission in event['Active']:
-                if(is_wing_massacre(mission['Name'])):
-                    id = mission['MissionID']
-                    # We only want to add missions we're not already tracking
-                    if not id in self.mission_dict:
-                        self.add_mission(id, MissionInfo(id=id))
+            current_missions = set(map(lambda x: x['MissionID'], event['Active']))
+            tracked_missions = list(self.mission_dict.keys())
+            for mission_id in tracked_missions:
+                if mission_id not in current_missions:
+                    self.remove_mission(mission_id)
 
     # {
     #     "timestamp": "2022-01-31T20:29:33Z",
