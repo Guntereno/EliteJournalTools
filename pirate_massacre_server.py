@@ -70,7 +70,7 @@ class PirateMassacreHandler(web_server.Handler):
 
         content = ""
 
-        content += f'<div class ="MissionCount">Currently tracking {report["MissionCount"]}/20 missions for a potential {"{:,}".format(report["TotalReward"])} credit reward.</div>'
+        content += f'<div class ="MissionCount">Currently tracking {report["MissionCount"]}/20 missions for a potential <em class="Credits">{"{:,}".format(report["TotalReward"])} credit</em> reward.</div>'
         for system_entry in report['MissionsBySystem']:
             system_name = system_entry['Name']
             system = report['Systems'][system_name]
@@ -93,7 +93,7 @@ class PirateMassacreHandler(web_server.Handler):
                         kills = mission.total_kills - mission.remaining_kills
                         content += '<div class="Mission">'
 
-                        message = 'Kill {} for {:,} credits'.format(mission.target_faction, mission.reward)
+                        message = 'Kill {} for <em class="Credits">{:,} credits</em>'.format(mission.target_faction, mission.reward)
                         message += ' &mdash; '
 
                         if mission.remaining_kills > 0:
