@@ -71,11 +71,13 @@ class PirateMassacreHandler(web_server.Handler):
         content = ""
 
         content += f'<div class ="MissionCount">Currently tracking {report["MissionCount"]}/20 missions for a potential {"{:,}".format(report["TotalReward"])} credit reward.</div>'
-        for system_entry in report['Systems']:
-            system = system_entry["System"]
+        for system_entry in report['MissionsBySystem']:
+            system_name = system_entry['Name']
+            system = report['Systems'][system_name]
             content += (f'<div class="SystemHeader">{system.name}</div>')
             for faction_entry in system_entry["Factions"]:
-                faction = faction_entry["Faction"]
+                faction_name = faction_entry['Name']
+                faction = report['Factions'][faction_name]
                 rep_string = faction.get_reputation_string()
                 rep_class = get_reputation_class(rep_string)
                 content += f'<div class="FactionHeader">{faction.name}<div class="{rep_class}">{rep_string}</div></div>'

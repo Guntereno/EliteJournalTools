@@ -394,17 +394,19 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
             if mission.reward is not None:
                 total_reward += mission.reward
 
-        systems = []
+        faction_set = set()
+
+        missions_by_system = []
         for system_name in sorted(system_set):
             system_entry = {}
             system_info = self.system_dict[system_name]
-            system_entry['System'] = system_info
+            system_entry['Name'] = system_name
             system_entry['Factions'] = []
             for faction_name in sorted(system_info.factions):
+                faction_set.add(faction_name)
                 system_faction = (system_name, faction_name)
                 faction_entry = {}
-                faction_info = self.faction_dict[faction_name]
-                faction_entry['Faction'] = faction_info
+                faction_entry['Name'] = faction_name
                 faction_entry['Missions'] = []
                 if system_faction in mission_dict:
                     for mission in mission_dict[system_faction]:
@@ -419,12 +421,14 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
                         break
                 faction_entry['HasMissionsInOtherSystem'] = has_missions_in_other_system
                 system_entry['Factions'].append(faction_entry)
-            systems.append(system_entry)
+            missions_by_system.append(system_entry)
 
         report = {}
-        report['Systems'] = systems
+        report['MissionsBySystem'] = missions_by_system
         report['MissionCount'] = len(self.mission_queue)
         report['TotalReward'] = total_reward
+        report['Systems'] = {system_name : self.system_dict[system_name] for system_name in system_set}
+        report['Factions'] = {faction_name : self.faction_dict[faction_name] for faction_name in faction_set}
 
         return report
 
@@ -434,10 +438,12 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
             f'Currently tracking {report["MissionCount"]}/20 missions for a total reward of {report["TotalReward"]}.')
         print()
 
-        for system_entry in report['Systems']:
-            print(f'# {system_entry["System"].name}')
+        for system_entry in report['MissionsBySystem']:
+            system_name = system_entry['Name']
+            system = report['Systems'][system_name]
+            print(f'# {system.name}')
             for faction_entry in system_entry["Factions"]:
-                faction = faction_entry["Faction"]
+                faction = report['Factions'][faction_entry['Name']]
                 print(f'## {faction.name} - {faction.reputation[0]}')
                 missions = faction_entry["Missions"]
                 if len(missions) > 0:
