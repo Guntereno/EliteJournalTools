@@ -1,74 +1,100 @@
+:root {
+    --color-positive: rgb(0, 167, 50);
+    --color-neutral: rgb(224, 165, 0);
+    --color-negative: rgba(200, 0, 0, 1);
+}
+
 html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, font, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td {
-	margin:0;
-	padding:0;
-	border:0;
-	outline:0;
-	font-weight:inherit;
-	font-style:inherit;
-	font-size:100%;
-	font-family:inherit;
-	vertical-align:baseline;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	outline: 0;
+	font-weight: inherit;
+	font-style: inherit;
+	font-size: 100%;
+	font-family: inherit;
+	vertical-align: baseline;
 }
 
-html{
-	color:rgb(255, 255, 255);
+html {
+	color: rgb(255, 255, 255);
 }
 
-body{
-	font-family:Arial,Helvetica,sans-serif;
-	background-color:rgb(0, 0, 0);
-	color:rgb(255,255,255);
-	font-size:1em;
+body {
+	font-family: Arial, Helvetica, sans-serif;
+	background-color: rgb(0, 0, 0);
+	color: rgb(255, 255, 255);
+	font-size: 1em;
 	height: 100%;
 }
 
-#Wrap
-{
-	width:900px;
+#Wrap {
+	width: 900px;
 	margin: 0 auto;
-	color:rgb(176, 174, 172);
-	background-color:rgb(16,16,16);
-	border: 1px solid rgb(32,32,32);
+	color: rgb(176, 174, 172);
+	background-color: rgb(16, 16, 16);
+	border: 1px solid rgb(32, 32, 32);
 	border-radius: 25px;
 	padding: 30px 20px;
 }
 
-.MissionCount
-{
-    color:rgb(170,170,170)
+div.MissionCount {
+	color: rgb(170, 170, 170)
 }
 
-.SystemHeader
-{
-    padding:20px 10px 5px 3px;
-	font-weight:bold;
-	font-size:1.4em;
-	color:rgb(255,255,225);
+div.SystemHeader {
+	padding: 20px 10px 5px 3px;
+	font-weight: bold;
+	font-size: 1.4em;
+	color: rgb(255, 255, 225);
 }
 
-.FactionHeader
-{
+div.FactionHeader {
 	padding: 5px 10px 0px 20px;
 	font-size: 1.2em;
 	font-weight: 400;
-	color:rgb(255,255,255);
+	color: rgb(255, 255, 255);
 	margin-bottom: 2px;
 }
 
-.Mission
-{
-	padding:0px 40px;
+div.Mission {
+	padding: 0px 40px;
 	font-size: 1.0em;
-	color:rgb(170,170,170);
+	color: rgb(170, 170, 170);
 	margin-bottom: 2px;
 }
 
-em.Expiry
-{
-	color: rgb(200, 0, 0)
+em.Expiry {
+	color: var(--color-negative);
 }
 
-em.Done
+em.Done {
+	color: var(--color-positive);
+}
+
+div.FactionRep .FactionRepBad
 {
-	color: rgb(0, 200, 0)
+	color: var(--color-negative);
+	display: inline;
+	margin-left: .5em;
+	font-size: .8em;
+	font-weight: 200;
+}
+
+.FactionRepNeutral
+{
+	color: var(--color-neutral);
+	display: inline;
+	margin-left: .5em;
+	font-size: .8em;
+	font-weight: 200;
+}
+
+.FactionRepGood
+{
+	color: var(--color-positive);
+	display: inline;
+	margin-left: .5em;
+	font-size: .8em;
+	font-weight: 200;
 }

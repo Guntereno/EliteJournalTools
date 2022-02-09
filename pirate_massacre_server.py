@@ -34,6 +34,19 @@ def build_remaining_time_str(expiry):
             message += strfdelta(remaining, '{hours}H {minutes}MIN')
         return message
 
+rep_classes = {
+    "HOSTILE": "FactionRepBad",
+    "UNFRIENDLY": "FactionRepBad",
+    "NEUTRAL": "FactionRepNeutral",
+    "FRIENDLY": "FactionRepGood",
+    "ALLIED": "FactionRepGood"
+}
+
+def get_reputation_class(rep_string):
+    if rep_string not in rep_classes:
+        return "FactionRepNeutral"
+    return rep_classes[rep_string]
+
 class PirateMassacreHandler(web_server.Handler):
     def get_handler(self, request):
         if request == "/mission_report":
@@ -58,11 +71,15 @@ class PirateMassacreHandler(web_server.Handler):
         content = ""
 
         content += f'<div class ="MissionCount">Currently tracking {report["MissionCount"]}/20 missions for a potential {"{:,}".format(report["TotalReward"])} credit reward.</div>'
-        for system in report['Systems']:
-            content += (f'<div class="SystemHeader">{system["Name"]}</div>')
-            for faction in system["Factions"]:
-                content += f'<div class="FactionHeader">{faction["Name"]}</div>'
-                missions = faction["Missions"]
+        for system_entry in report['Systems']:
+            system = system_entry["System"]
+            content += (f'<div class="SystemHeader">{system.name}</div>')
+            for faction_entry in system_entry["Factions"]:
+                faction = faction_entry["Faction"]
+                rep_string = faction.get_reputation_string()
+                rep_class = get_reputation_class(rep_string)
+                content += f'<div class="FactionHeader">{faction.name}<div class="{rep_class}">{rep_string}</div></div>'
+                missions = faction_entry["Missions"]
                 if len(missions) > 0:
                     for mission in missions:
                         kills = mission.total_kills - mission.remaining_kills
@@ -83,7 +100,7 @@ class PirateMassacreHandler(web_server.Handler):
                 else:
                     content += '<div class="Mission">'
                     content += 'None'
-                    if faction['HasMissionsInOtherSystem']:
+                    if faction_entry['HasMissionsInOtherSystem']:
                         content +=' (have mission in other system)'
                     content += '</div>'
 
