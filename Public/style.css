@@ -49,6 +49,23 @@ body {
 	margin-bottom: 10px;
 }
 
+#Error{
+	color: rgb(221, 215, 210);
+	background-color: rgb(43, 43, 43);
+	border: 1px solid rgb(82, 82, 82);
+	border-radius: 5px;
+	padding: 0px 0px;
+	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.6);
+	box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5);
+	width: 400px;
+	height: 10px;
+	padding: 20px;
+	text-align: center;
+	position: absolute;
+	left: 30%;
+	top: 20px;
+	margin-left: -50px;
+}
 
 #Finance{
 	height: 300px;
