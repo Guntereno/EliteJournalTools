@@ -1,4 +1,6 @@
 import journal_scan
+import dateutil
+import datetime
 
 class Transaction:
     timestamp = None
@@ -18,7 +20,9 @@ class FinanceTracker(journal_scan.JournalScanner):
     discrepencies = 0
 
     def apply_delta(self, delta, event):
-        self.transactions.append(Transaction(event['timestamp'], delta, event['event']))
+        iso_timestamp = event['timestamp']
+        timestamp = dateutil.parser.isoparse(iso_timestamp)
+        self.transactions.append(Transaction(timestamp, delta, event['event']))
         self.current_balance += delta
 
     def set_balance(self, new_balance, event):
@@ -30,7 +34,7 @@ class FinanceTracker(journal_scan.JournalScanner):
     def handle_load_game(self, event):
         delta = self.set_balance(event['Credits'], event)
         if delta != 0:
-            print(f'Starting session with delta of {delta} at time {event["timestamp"]}')
+            #print(f'Starting session with delta of {delta} at time {event["timestamp"]}')
             self.discrepencies += 1
 
     def handle_buy_exporation_data(self, event):
@@ -159,10 +163,18 @@ class FinanceTracker(journal_scan.JournalScanner):
         self.register_handler('PowerplaySalary', self.handle_powerplay_salary)
 
     def output_report(self):
-        print(f'Discrepencies: {self.discrepencies}')
+        #print(f'Discrepencies: {self.discrepencies}')
+        current = 0
+        print("['time', 'credits'],")
+    
+        start_date = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days = 2)
+
         for transaction in self.transactions:
-            print(f'{transaction.delta}: {transaction.desc}')
-        print(self.current_balance)
+            current += transaction.delta
+            if transaction.timestamp > start_date:
+                date_str = transaction.timestamp.strftime('%H:%M:%S')
+                print(f"['{date_str}', {current}],")
+
 
 if __name__ == "__main__":
     scanner = FinanceTracker()

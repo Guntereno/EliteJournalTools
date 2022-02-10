@@ -152,7 +152,7 @@ def scan_journal(scanner):
     return scan_journal_files_in_date_range(scanner, start_date, end_date)
 
 if __name__ == "__main__":
-    # Simple scanner which prints all recvieved text as a test
+    # Simple scanner which prints all recieved text as a test
     scanner = JournalScanner()
     scanner.register_handler('ReceiveText', lambda e: print(e['Message_Localised']) if ('Message_Localised' in e) else print (e['Message']))
     scan_journal(scanner)

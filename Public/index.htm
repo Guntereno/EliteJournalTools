@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
+
 <head>
     <title>Pirate Massacre</title>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+    <!--<script type="text/javascript" src="echarts.js"></script>-->
     <script type="text/javascript" language="javascript">
         function timingLoad() {
             $('#Main').load('mission_report');
@@ -11,9 +13,110 @@
     </script>
     <link rel="stylesheet" type="text/css" href="style.css">
 </head>
+
 <body>
     <div id="Wrap">
-        <div id="Main"><div id="Loading">Loading...</div></div>
+        <div id="Main" class="Panel">
+            <div id="Loading">Loading...</div>
+        </div>
+        <!--
+        <div id="Finance" class="Panel">Finance</div>
+        <script type="text/javascript">
+            var xhr = new XMLHttpRequest();
+            $.getJSON('chart_theme.json', function (themeJSON) {
+                echarts.registerTheme('spoon', themeJSON);
+
+                // Initialize the echarts instance based on the prepared dom
+                var finance = document.getElementById('Finance')
+                var myChart = echarts.init(finance, 'spoon');
+
+                var dataSource = [
+                            ['time', 'credits'],
+                            ['18:43:03', 5557836644],
+                            ['18:56:35', 5557836644],
+                            ['19:08:20', 5557836611],
+                            ['19:19:02', 5557836575],
+                            ['19:20:28', 5557836565],
+                            ['19:25:24', 5557836555],
+                            ['19:26:25', 5557686555],
+                            ['19:51:28', 5557686555],
+                            ['19:51:29', 5557686261],
+                            ['19:51:30', 5557666235],
+                            ['19:51:30', 5557665184],
+                            ['19:52:09', 5557647161],
+                            ['21:22:06', 5557647161],
+                            ['21:22:08', 5557646900],
+                            ['21:22:08', 5557627058],
+                            ['21:22:10', 5557620615],
+                            ['21:22:10', 5557618555],
+                            ['21:22:10', 5557617525],
+                            ['21:22:37', 5557611509],
+                            ['21:22:54', 5575871513],
+                            ['21:27:18', 5591363935],
+                            ['21:38:18', 5591363925],
+                            ['21:38:29', 5591363800],
+                            ['21:39:39', 5617547318],
+                            ['21:39:45', 5631045914],
+                            ['21:39:53', 5670209922],
+                            ['21:55:40', 5670209904],
+                            ['21:58:27', 5724559099],
+                            ['22:03:39', 5750060299],
+                            ['22:04:15', 5784834523],
+                            ['22:04:35', 5807585009],
+                            ['22:05:08', 5840718993],
+                            ['22:05:34', 5862393889],
+                            ['22:05:57', 5892785701],
+                            ['20:08:51', 6036305937],
+                            ['20:16:38', 6036305926],
+                            ['20:26:58', 6036305912],
+                            ['20:36:54', 6036305882],
+                            ['20:43:09', 6036305872],
+                            ['21:10:24', 6036305872],
+                            ['21:22:11', 6036305731],
+                            ['21:22:12', 6036300642],
+                            ['21:22:26', 6041669066],
+                            ['21:26:20', 6041519066],
+                            ['21:59:54', 6041519066],
+                            ['21:59:56', 6041518960],
+                            ['21:59:58', 6041456229],
+                            ['21:59:59', 6041446313],
+                            ['21:59:59', 6041444211],
+                            ['21:59:59', 6041443160],
+                            ['22:00:10', 6041440859],
+                        ];
+
+                // Specify the configuration items and data for the chart
+                var option = {
+                    legend: {},
+                    tooltip: {},
+                    xAxis: {
+                        type: 'category',
+                        name: 'Time'
+                    },
+                    yAxis: {},
+                    series: [
+                        {
+                            type: 'line',
+                            name: 'Credits'
+                        }
+                    ],
+                    grid: {
+                        left: "15%"
+                    },
+                };
+
+                // Display the chart using the configuration items and data just specified.
+                myChart.setOption(option);
+
+                myChart.setOption({
+                    dataset: {
+                        source: dataSource
+                    },
+                });
+            });
+        </script>
+        -->
     </div>
 </body>
+
 </html>
