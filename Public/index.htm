@@ -7,27 +7,29 @@
     <script type="text/javascript" src="echarts.js"></script>
     <script type="text/javascript" language="javascript">
         function showError() {
-            errorDialog = document.getElementById('Error');
-            errorDialog.style.visibility = "visible";
+            document.getElementById('Error').style.visibility = "visible";
+            document.getElementById('Cover').style.visibility = "visible";
         }
 
         function hideError() {
-            errorDialog = document.getElementById('Error');
-            errorDialog.style.visibility = "hidden";
+            document.getElementById('Error').style.visibility = "hidden";
+            document.getElementById('Cover').style.visibility = "hidden";
         }
     </script>
     <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 
 <body>
-    <div id="Error">An error occured connectiong to the server. Retrying...</div>
+    <div id="Cover"></div>
+    <div id="Error" class="Panel">Connection error. Retrying...</div>
+
     <div id="Wrap">
-        <div id="Main" class="Panel">
+        <div id="Missions" class="Panel">
             <div id="Loading">Loading...</div>
         </div>
         <script type="text/javascript" language="javascript">
             function reloadMissions() {
-                $('#Main').load('mission_report', function (response, status, xhr) {
+                $('#Missions').load('mission_report', function (response, status, xhr) {
                     if (status == 'error') {
                         showError();
                     }
@@ -43,13 +45,6 @@
 
         <div id="Finance" class="Panel">Finance</div>
         <script type="text/javascript" language="javascript">
-            function reloadFinance() {
-                $.getJSON('finance_report', function (finance_data) {
-                    financeElement.style.visibility = "visible"
-                    financeChart.setOption({ dataset: { source: finance_data } });
-                })
-            }
-
             function createChart() {
                 $.getJSON('chart_theme.json', function (themeJSON) {
                     echarts.registerTheme('chart_theme', themeJSON);
@@ -86,6 +81,13 @@
 
                     setInterval(reloadFinance, 3000);
                 });
+            }
+
+            function reloadFinance() {
+                $.getJSON('finance_report', function (finance_data) {
+                    financeElement.style.visibility = "visible"
+                    financeChart.setOption({ dataset: { source: finance_data } });
+                })
             }
 
             let financeElement = document.getElementById('Finance')

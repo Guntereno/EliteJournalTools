@@ -1,7 +1,7 @@
 :root {
-    --color-positive: rgb(0, 167, 50);
-    --color-neutral: rgb(224, 165, 0);
-    --color-negative: rgba(200, 0, 0, 1);
+	--color-positive: rgb(0, 167, 50);
+	--color-neutral: rgb(224, 165, 0);
+	--color-negative: rgba(200, 0, 0, 1);
 	--color-greyed: rgb(92, 92, 92);
 }
 
@@ -50,16 +50,29 @@ body {
 	margin-bottom: 10px;
 }
 
-#Error{
-	width: 100%;
-	height: 100%;
-	background-color: rgba(0, 0, 0, 0.5);
+#Error {
 	position: absolute;
-	padding: 0px 20px;
-	text-shadow: 1px 1px 1px rgba(0, 0, 0, 1);
+	width: 320px;
+	top: 50px;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	z-index: 10;
+	text-align: center;
+	vertical-align: middle;
+	padding: 10px 40px;
 }
 
-#Finance{
+#Cover {
+	position: fixed;
+	top: 0;
+	left: 0;
+	background: rgba(0, 0, 0, 0.5);
+	z-index: 5;
+	width: 100%;
+	height: 100%;
+}
+
+#Finance {
 	height: 300px;
 }
 
@@ -97,8 +110,7 @@ div.Mission {
 	color: rgb(170, 170, 170);
 }
 
-div.FactionRep .FactionRepBad
-{
+div.FactionRep .FactionRepBad {
 	color: var(--color-negative);
 	display: inline;
 	margin-left: .5em;
@@ -106,8 +118,7 @@ div.FactionRep .FactionRepBad
 	font-weight: 200;
 }
 
-.FactionRepNeutral
-{
+.FactionRepNeutral {
 	color: var(--color-neutral);
 	display: inline;
 	margin-left: .5em;
@@ -115,8 +126,7 @@ div.FactionRep .FactionRepBad
 	font-weight: 200;
 }
 
-.FactionRepGood
-{
+.FactionRepGood {
 	color: var(--color-positive);
 	display: inline;
 	margin-left: .5em;
