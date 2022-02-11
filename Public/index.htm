@@ -49,7 +49,7 @@
                 $.getJSON('chart_theme.json', function (themeJSON) {
                     echarts.registerTheme('chart_theme', themeJSON);
 
-                    var financeElement = document.getElementById('Finance')
+                    var financeElement = document.getElementById('Finance');
                     financeChart = echarts.init(financeElement, 'chart_theme');
 
                     // Specify the configuration items and data for the chart
@@ -58,7 +58,7 @@
                         tooltip: {
                             trigger: 'axis',
                             axisPointer: {
-                            animation: false
+                                animation: false
                             }
                         },
                         xAxis: {
@@ -72,7 +72,7 @@
                             }
                         ],
                         grid: {
-                            left: "15%"
+                            left: "80px"
                         },
                     };
 
@@ -84,16 +84,37 @@
             }
 
             function reloadFinance() {
-                $.getJSON('finance_report', function (finance_data) {
-                    financeElement.style.visibility = "visible"
-                    financeChart.setOption({ dataset: { source: finance_data } });
+                $.getJSON('finance_report', function (financeData) {
+                    // Translate the date formats
+                    for (let i = 1; i < financeData['values'].length; i++) {
+                        entry = financeData['values'][i];
+                        isoDate = entry[0];
+                        date = new Date(isoDate);
+                        entry[0] =
+                            date.getHours() + ":" +
+                            date.getMinutes() + ":" +
+                            date.getSeconds() + "\n" +
+                            date.getDate() + "-" +
+                            (date.getMonth() + 1) + "-" +
+                            date.getFullYear();
+                    }
+
+                    // Calculate a reasonable width for the credit labels
+                    const PixelsPerChar = 9;
+                    labelLength = financeData['max'].toLocaleString().length * PixelsPerChar;
+
+                    financeElement.style.visibility = "visible";
+                    financeChart.setOption({
+                        dataset: { source: financeData['values'] },
+                        grid: { left: labelLength.toString() + "px" }
+                    });
                 })
             }
 
-            let financeElement = document.getElementById('Finance')
-            financeElement.style.visibility = "hidden"
+            let financeElement = document.getElementById('Finance');
+            financeElement.style.visibility = "hidden";
 
-            let financeChart = createChart()
+            let financeChart = createChart();
         </script>
 
         <script type="text/javascript">

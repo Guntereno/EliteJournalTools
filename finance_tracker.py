@@ -2,6 +2,7 @@ import journal_scan
 import json
 import dateutil
 import datetime
+import sys
 
 class Transaction:
     def __init__(self, timestamp, delta, desc):
@@ -163,12 +164,22 @@ class FinanceTracker(journal_scan.JournalScanner):
     def build_report_json(self):
         current = 0
         values = []
+        min = sys.float_info.max
+        max = sys.float_info.min
         values.append(['time', 'credits'])
         for transaction in self.transactions:
             current += transaction.delta
-            date_str = transaction.timestamp.strftime('%H:%M:%S')
-            values.append([date_str, current])
-        return json.dumps(values)
+            values.append([transaction.timestamp.isoformat(), current])
+            if(current < min):
+                min = current
+            if(current > max):
+                max = current
+        report = {
+            'min': min,
+            'max': max,
+            'values': values
+        }
+        return json.dumps(report)
 
 
     def output_report(self):
