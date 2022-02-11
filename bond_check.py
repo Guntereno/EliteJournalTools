@@ -3,8 +3,14 @@ from datetime import timedelta
 import journal_scan
 
 class BondScanner(journal_scan.JournalScanner):
-    totals = {}
-    current_system = "Unknown"
+    def __init__(self):
+        super().__init__()
+
+        self.totals = {}
+        self.current_system = "Unknown"
+
+        self.register_handler("RedeemVoucher", self.handle_redeem_voucher)
+        self.register_handler("Location", self.handle_location)
 
     def handle_redeem_voucher(self, event):
         if event["Type"] == "CombatBond":
@@ -20,10 +26,6 @@ class BondScanner(journal_scan.JournalScanner):
     def handle_location(self, event):
         global current_system
         self.current_system = event["StarSystem"]
-
-    def __init__(self):
-        self.register_handler("RedeemVoucher", self.handle_redeem_voucher)
-        self.register_handler("Location", self.handle_location)
 
     def output_report(self):
         for date,entries in self.totals.items():

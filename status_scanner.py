@@ -12,6 +12,8 @@ thread = None
 
 def init():
     global thread
+    if(thread is not None):
+        return
     thread = threading.Thread(target = main_thread)
     thread.start()
 

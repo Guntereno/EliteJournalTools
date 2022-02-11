@@ -1,6 +1,7 @@
 import datetime
 import journal_scan
 import os
+import finance_tracker
 import pirate_massacre
 import threading
 import time
@@ -8,12 +9,30 @@ import web_server
 from pytz import UTC
 
 
-scanner = None
+pirate_scanner = None
+finance_scanner = None
+
+def all_scanners():
+    return [pirate_scanner, finance_scanner]
+
 mutex = threading.Lock()
 
 # There appears to be a bug in the bookmark system. Until that's fixed we'll rebuild
 # the complete scanner every time a request is made
 rebuild_scanner_on_request = False
+
+def build_scanners():
+    global pirate_scanner
+    global finance_scanner
+
+    pirate_scanner = pirate_massacre.PirateMassacreScanner()
+    finance_scanner = finance_tracker.FinanceTracker()
+
+    # Wing missions last around 7 days, so we only need to scan that far back
+    start_date = datetime.datetime.now(UTC) - datetime.timedelta(8)
+    book_mark = journal_scan.scan_journal_files_in_date_range(all_scanners(), start_date, None)
+
+    return book_mark
 
 def strfdelta(tdelta, fmt):
     d = {"days": tdelta.days}
@@ -51,17 +70,19 @@ class PirateMassacreHandler(web_server.Handler):
     def get_handler(self, request):
         if request == "/mission_report":
             return self.send_mission_report
+        elif request == "/finance_report":
+            return self.send_finance_report
         return None
 
     def send_mission_report(self):
-        if scanner == None:
+        if pirate_scanner == None:
             return
 
         global mutex
         mutex.acquire()
         if rebuild_scanner_on_request:
-            build_scanner()
-        report = scanner.build_report()
+            build_scanners()
+        report = pirate_scanner.build_report()
         mutex.release()
 
         self.send_response(200)
@@ -116,33 +137,43 @@ class PirateMassacreHandler(web_server.Handler):
 
         self.wfile.write(bytes(content, "utf-8"))
 
+    def send_finance_report(self):
+        if finance_scanner == None:
+            return
+
+        global mutex
+        mutex.acquire()
+        report = finance_scanner.build_report_json()
+        mutex.release()
+
+        self.send_response(200)
+        self.send_header("Content-type", "text/json")
+        self.end_headers()
+
+        content = finance_scanner.build_report_json()
+        self.wfile.write(bytes(content, "utf-8"))
+
 def main_loop(book_mark):
     if rebuild_scanner_on_request:
         return
 
     global mutex
-    global scanner
+    global pirate_scanner
     
     while True:
         time.sleep(0.5)
 
         mutex.acquire()
-        book_mark = journal_scan.resume_from_book_mark(scanner, book_mark)
+        book_mark = journal_scan.resume_from_book_mark(
+            all_scanners(),
+            book_mark)
         mutex.release()
 
-def build_scanner():
-    global scanner
-
-    # Wing missions last around 7 days, so we only need to scan that far back
-    scanner = pirate_massacre.PirateMassacreScanner()
-    start_date = datetime.datetime.now(UTC) - datetime.timedelta(8)
-    book_mark = journal_scan.scan_journal_files_in_date_range(scanner, start_date, None)
-    return book_mark
 
 if __name__ == "__main__":
     args = web_server.parse_args("Run a web server showing a live stream of your pirate massacre missions grouped by system.")
 
-    book_mark = build_scanner()
+    book_mark = build_scanners()
 
     public_path = os.path.join(
         os.path.dirname(

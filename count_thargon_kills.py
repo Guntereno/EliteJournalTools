@@ -1,9 +1,17 @@
 import journal_scan
 
+
 class ThargonKillScanner(journal_scan.JournalScanner):
-    in_wing = False
-    solo_counts = {}
-    wing_counts = {}
+    def __init__(self):
+        super().__init__()
+
+        self.in_wing = False
+        self.solo_counts = {}
+        self.wing_counts = {}
+
+        self.register_handler("WingJoin", self.handle_wing_join)
+        self.register_handler("WingLeave", self.handle_wing_leave)
+        self.register_handler("FactionKillBond", self.handle_faction_kill_bond)
 
     def handle_wing_join(self, event):
         self.in_wing = True
@@ -24,13 +32,9 @@ class ThargonKillScanner(journal_scan.JournalScanner):
         else:
             records[reward] = records[reward] + 1
 
-    def __init__(self):
-        self.register_handler("WingJoin", self.handle_wing_join)
-        self.register_handler("WingLeave", self.handle_wing_leave)
-        self.register_handler("FactionKillBond", self.handle_faction_kill_bond)
-
     def output_report(self):
-        key_set = set(list(self.solo_counts.keys()) + list(self.wing_counts.keys()))
+        key_set = set(list(self.solo_counts.keys()) +
+                      list(self.wing_counts.keys()))
 
         thargoid_name_by_reward = {
             10000: "Scout",
@@ -44,7 +48,7 @@ class ThargonKillScanner(journal_scan.JournalScanner):
             wing_count = 0
             if reward in self.wing_counts:
                 wing_count = self.wing_counts[reward]
-            
+
             solo_count = 0
             if reward in self.solo_counts:
                 solo_count = self.solo_counts[reward]
@@ -55,6 +59,7 @@ class ThargonKillScanner(journal_scan.JournalScanner):
                 name = str(reward)
 
             print(f"{name}: {solo_count} solo, {wing_count} in wing.")
+
 
 if __name__ == "__main__":
     scanner = ThargonKillScanner()

@@ -5,16 +5,6 @@ from pytz import UTC
 
 
 class MissionInfo:
-    id = None
-    giving_faction = None
-    target_faction = None
-    remaining_kills = None
-    total_kills = None
-    system_name = None
-    description = None
-    reward = None
-    expiry = None
-
     def __init__(
             self,
             id=None,
@@ -36,9 +26,6 @@ class MissionInfo:
 
 
 class SystemInfo:
-    name = None
-    factions = None
-
     def __init__(
             self,
             name=None,
@@ -46,13 +33,7 @@ class SystemInfo:
         self.name = name
         self.factions = factions
 
-
 class FactionInfo:
-    name = None
-    reputation = None
-    government = None
-    state = None
-
     def __init__(
             self,
             name=None,
@@ -85,11 +66,25 @@ def is_wing_massacre(mission_name):
 
 
 class PirateMassacreScanner(journal_scan.JournalScanner):
-    mission_queue = []
-    mission_dict = {}
-    system_dict = {}
-    faction_dict = {}
-    current_system = None
+    def __init__(self):
+        super().__init__()
+
+        self.mission_queue = []
+        self.mission_dict = {}
+        self.system_dict = {}
+        self.faction_dict = {}
+        self.current_system = None
+
+        self.register_handler("Missions", self.handle_missions)
+        self.register_handler("MissionAccepted", self.handle_mission_accepted)
+        self.register_handler("MissionAbandoned",
+                              self.handle_mission_abandoned)
+        self.register_handler("MissionFailed", self.handle_mission_failed)
+        self.register_handler("MissionCompleted",
+                              self.handle_mission_completed)
+        self.register_handler("Bounty", self.handle_bounty)
+        self.register_handler("FSDJump", self.handle_fsd_jump)
+        self.register_handler("Location", self.handle_location)
 
     def add_mission(self, id, mission):
         self.mission_queue.append(mission)
@@ -373,18 +368,6 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
             faction_names = list(map(lambda x: x['Name'], event['Factions']))
             self.system_dict[system_name] = SystemInfo(
                 self.current_system, faction_names)
-
-    def __init__(self):
-        self.register_handler("Missions", self.handle_missions)
-        self.register_handler("MissionAccepted", self.handle_mission_accepted)
-        self.register_handler("MissionAbandoned",
-                              self.handle_mission_abandoned)
-        self.register_handler("MissionFailed", self.handle_mission_failed)
-        self.register_handler("MissionCompleted",
-                              self.handle_mission_completed)
-        self.register_handler("Bounty", self.handle_bounty)
-        self.register_handler("FSDJump", self.handle_fsd_jump)
-        self.register_handler("Location", self.handle_location)
 
     def build_report(self):
         system_set = filter(lambda x: (x is not None) and (

@@ -1,12 +1,9 @@
 import journal_scan
+import json
 import dateutil
 import datetime
 
 class Transaction:
-    timestamp = None
-    delta = None
-    desc = None
-
     def __init__(self, timestamp, delta, desc):
         self.timestamp = timestamp
         self.delta = delta
@@ -15,9 +12,46 @@ class Transaction:
 
 # List count of each scanned body type
 class FinanceTracker(journal_scan.JournalScanner):
-    current_balance = 0
-    transactions = []
-    discrepencies = 0
+    def __init__(self):
+        super().__init__()
+
+        self.current_balance = 0
+        self.transactions = []
+        self.discrepencies = 0
+
+        self.register_handler('LoadGame', self.handle_load_game)
+        self.register_handler('BuyExplorationData', self.handle_buy_exporation_data)
+        self.register_handler('SellExplorationData', self.handle_sell_exporation_data)
+        self.register_handler('MultiSellExplorationData', self.handle_sell_exporation_data)
+        self.register_handler('BuyTradeData', self.handle_buy_trade_data)
+        self.register_handler('MarketBuy', self.handle_market_buy)
+        self.register_handler('MarketSell', self.handle_market_sell)
+        self.register_handler('BuyAmmo', self.handle_buy_ammo)
+        self.register_handler('BuyDrones', self.handle_buy_drones)
+        self.register_handler('CommunityGoalReward', self.handle_community_goal_reward)
+        self.register_handler('CrewHire', self.handle_crew_hire)
+        self.register_handler('FetchRemoteModule', self.handle_fetch_remote_module)
+        self.register_handler('MissionCompleted', self.handle_mission_completed)
+        self.register_handler('ModuleBuy', self.handle_module_buy)
+        self.register_handler('ModuleSell', self.handle_module_sell)
+        self.register_handler('ModuleSellRemote', self.handle_module_sell)
+        self.register_handler('ModuleStore', self.handle_module_store)
+        self.register_handler('NpcCrewPaidWage', self.handle_npc_crew_paid_wage)
+        self.register_handler('PayBounties', self.handle_pay_fines) # Missing from API doc
+        self.register_handler('PayFines', self.handle_pay_fines)
+        self.register_handler('PayLegacyFines', self.handle_pay_fines)
+        self.register_handler('RedeemVoucher', self.handle_redeem_voucher)
+        self.register_handler('RefuelAll', self.handle_refuel)
+        self.register_handler('RefuelPartial', self.handle_refuel)
+        self.register_handler('Repair', self.handle_repair)
+        self.register_handler('RepairAll', self.handle_repair)
+        self.register_handler('RestockVehicle', self.handle_restock_vehicle)
+        self.register_handler('SellDrones', self.handle_sell_drones)
+        self.register_handler('ShipyardBuy', self.handle_shipyard_buy)
+        self.register_handler('ShipyardBuy', self.handle_shipyard_sell)
+        self.register_handler('ShipyardTransfer', self.handle_shipyard_transfer)
+        self.register_handler('PowerplayFastTrack', self.handle_powerplay_fast_track)
+        self.register_handler('PowerplaySalary', self.handle_powerplay_salary)
 
     def apply_delta(self, delta, event):
         iso_timestamp = event['timestamp']
@@ -126,41 +160,16 @@ class FinanceTracker(journal_scan.JournalScanner):
     def handle_powerplay_salary(self, event):
         self.apply_delta(event['Amount'], event)
 
+    def build_report_json(self):
+        current = 0
+        values = []
+        values.append(['time', 'credits'])
+        for transaction in self.transactions:
+            current += transaction.delta
+            date_str = transaction.timestamp.strftime('%H:%M:%S')
+            values.append([date_str, current])
+        return json.dumps(values)
 
-    def __init__(self):
-        self.register_handler('LoadGame', self.handle_load_game)
-        self.register_handler('BuyExplorationData', self.handle_buy_exporation_data)
-        self.register_handler('SellExplorationData', self.handle_sell_exporation_data)
-        self.register_handler('MultiSellExplorationData', self.handle_sell_exporation_data)
-        self.register_handler('BuyTradeData', self.handle_buy_trade_data)
-        self.register_handler('MarketBuy', self.handle_market_buy)
-        self.register_handler('MarketSell', self.handle_market_sell)
-        self.register_handler('BuyAmmo', self.handle_buy_ammo)
-        self.register_handler('BuyDrones', self.handle_buy_drones)
-        self.register_handler('CommunityGoalReward', self.handle_community_goal_reward)
-        self.register_handler('CrewHire', self.handle_crew_hire)
-        self.register_handler('FetchRemoteModule', self.handle_fetch_remote_module)
-        self.register_handler('MissionCompleted', self.handle_mission_completed)
-        self.register_handler('ModuleBuy', self.handle_module_buy)
-        self.register_handler('ModuleSell', self.handle_module_sell)
-        self.register_handler('ModuleSellRemote', self.handle_module_sell)
-        self.register_handler('ModuleStore', self.handle_module_store)
-        self.register_handler('NpcCrewPaidWage', self.handle_npc_crew_paid_wage)
-        self.register_handler('PayBounties', self.handle_pay_fines) # Missing from API doc
-        self.register_handler('PayFines', self.handle_pay_fines)
-        self.register_handler('PayLegacyFines', self.handle_pay_fines)
-        self.register_handler('RedeemVoucher', self.handle_redeem_voucher)
-        self.register_handler('RefuelAll', self.handle_refuel)
-        self.register_handler('RefuelPartial', self.handle_refuel)
-        self.register_handler('Repair', self.handle_repair)
-        self.register_handler('RepairAll', self.handle_repair)
-        self.register_handler('RestockVehicle', self.handle_restock_vehicle)
-        self.register_handler('SellDrones', self.handle_sell_drones)
-        self.register_handler('ShipyardBuy', self.handle_shipyard_buy)
-        self.register_handler('ShipyardBuy', self.handle_shipyard_sell)
-        self.register_handler('ShipyardTransfer', self.handle_shipyard_transfer)
-        self.register_handler('PowerplayFastTrack', self.handle_powerplay_fast_track)
-        self.register_handler('PowerplaySalary', self.handle_powerplay_salary)
 
     def output_report(self):
         #print(f'Discrepencies: {self.discrepencies}')
