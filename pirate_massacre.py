@@ -14,7 +14,8 @@ class MissionInfo:
             system_name=None,
             description=None,
             reward=None,
-            expiry=None):
+            expiry=None,
+            wing=None):
         self.id = id
         self.giving_faction = giving_faction
         self.target_faction = target_faction
@@ -23,6 +24,7 @@ class MissionInfo:
         self.description = description
         self.reward = reward
         self.expiry = expiry
+        self.wing = wing
 
 
 class SystemInfo:
@@ -60,9 +62,11 @@ class FactionInfo:
         else:
             return "ALLIED"
 
+def is_massacre(mission_name):
+    return 'Massacre' in mission_name
 
-def is_wing_massacre(mission_name):
-    return mission_name.startswith('Mission_MassacreWing')
+def is_wing_mission(mission_name):
+    return 'Wing' in mission_name
 
 
 class PirateMassacreScanner(journal_scan.JournalScanner):
@@ -136,7 +140,7 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
     #     "MissionID": 842359897
     # }
     def handle_mission_accepted(self, event):
-        if is_wing_massacre(event['Name']):
+        if is_massacre(event['Name']):
             id = event['MissionID']
 
             expiry = dateutil.parser.isoparse(event['Expiry'])
@@ -149,7 +153,8 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
                 system_name=self.current_system,
                 description=event['LocalisedName'],
                 reward=event['Reward'],
-                expiry=expiry)
+                expiry=expiry,
+                wing = is_wing_mission(event['Name']))
 
             self.add_mission(id, mission)
 

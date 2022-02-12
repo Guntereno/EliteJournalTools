@@ -117,6 +117,8 @@ class PirateMassacreHandler(web_server.Handler):
                         content += '<div class="Mission">'
 
                         message = 'Kill {} for <em class="Credits">{:,} credits</em>'.format(mission.target_faction, mission.reward)
+                        if mission.wing:
+                            message += ' &#x1F91D; '
                         message += ' &mdash; '
 
                         if mission.remaining_kills > 0:
