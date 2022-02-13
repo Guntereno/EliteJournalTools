@@ -99,7 +99,7 @@ class PirateMassacreHandler(web_server.Handler):
 
         content = ""
 
-        content += f'<div class ="MissionCount">Currently tracking {report["MissionCount"]}/20 missions for a potential <em class="Credits">{"{:,}".format(report["TotalReward"])} credit</em> reward.</div>'
+        content += f'<div class ="MissionCount">Tracking {report["MissionCount"]}/20 missions for a potential <em class="Credits">{"{:,}".format(report["TotalReward"])} credit</em> reward. (<em class="Credits">{"{:,}".format(report["TotalWingReward"])} credits</em> in <em class="Wing">wing missions</em>.)</div>'
         for system_entry in report['MissionsBySystem']:
             system_name = system_entry['Name']
             system = report['Systems'][system_name]
@@ -126,7 +126,7 @@ class PirateMassacreHandler(web_server.Handler):
 
                         message = 'Kill {} for <em class="Credits">{:,} credits</em>'.format(mission.target_faction, mission.reward)
                         if mission.wing:
-                            message += ' &#x1F91D; '
+                            message += ' <em class="Wing">WING</em> '
                         message += ' &mdash; '
 
                         if mission.remaining_kills > 0:

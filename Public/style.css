@@ -190,6 +190,13 @@ em.Credits {
 	text-shadow: 0 0 5px #ffff338a;
 }
 
+em.Wing {
+	color: #5fdfff;
+	font-style: normal;
+	text-shadow: 0 0 5px #76fff48a;
+}
+
+
 em.Greyed {
 	color: var(--color-greyed);
 }
