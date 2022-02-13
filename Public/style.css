@@ -39,6 +39,55 @@ body {
 	text-align: center;
 }
 
+#MenuBar {
+	position: relative;
+	display: inline-block;
+	background-color: rgb(29, 29, 29);
+	border: 1px solid rgb(39, 39, 39);
+	padding: 2px;
+	width: 100%;
+	text-align: right;
+}
+
+.MenuButton {
+	position: relative;
+	display: inline-block;
+	border: none;
+	cursor: pointer;
+	background-color: #0000;
+	font-size: 2em;
+}
+
+#Menu {
+	display: none;
+	position: absolute;
+	min-width: 160px;
+	z-index: 1;
+	right: 0;
+}
+
+#Menu a {
+	display: block;
+	padding: 2px 5px 2px 5px;
+	background-color: rgb(43, 43, 43);
+	border: 1px solid rgb(82, 82, 82);
+	cursor: pointer;
+	box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.5);
+	text-align: left;
+	color: rgb(255, 255, 255);
+	text-decoration: none;
+}
+
+#Menu a:hover {
+	background-color: rgb(202, 97, 11);
+	border-color: rgb(255, 148, 60);
+}
+
+#MenuBar:hover #Menu {
+	display: block;
+}
+
+
 .Panel {
 	color: rgb(221, 215, 210);
 	background-color: rgb(43, 43, 43);

@@ -11,6 +11,7 @@ from pytz import UTC
 
 pirate_scanner = None
 finance_scanner = None
+book_mark = None
 
 def all_scanners():
     return [pirate_scanner, finance_scanner]
@@ -24,15 +25,19 @@ rebuild_scanner_on_request = False
 def build_scanners():
     global pirate_scanner
     global finance_scanner
+    global book_mark
+    global mutex
 
+    mutex.acquire()
     pirate_scanner = pirate_massacre.PirateMassacreScanner()
     finance_scanner = finance_tracker.FinanceTracker()
+    mutex.release()
 
     # Wing missions last around 7 days, so we only need to scan that far back
     start_date = datetime.datetime.now(UTC) - datetime.timedelta(8)
     book_mark = journal_scan.scan_journal_files_in_date_range(all_scanners(), start_date, None)
 
-    return book_mark
+    print("Scanners rebuilt.")
 
 def strfdelta(tdelta, fmt):
     d = {"days": tdelta.days}
@@ -69,19 +74,22 @@ def get_reputation_class(rep_string):
 class PirateMassacreHandler(web_server.Handler):
     def get_handler(self, request):
         if request == "/mission_report":
-            return self.send_mission_report
+            return self.get_mission_report
         elif request == "/finance_report":
-            return self.send_finance_report
+            return self.get_finance_report
+        elif request == "/rebuild":
+            return self.get_rebuild
         return None
 
-    def send_mission_report(self):
+    def get_mission_report(self):
         if pirate_scanner == None:
             return
 
-        global mutex
-        mutex.acquire()
         if rebuild_scanner_on_request:
             build_scanners()
+
+        global mutex
+        mutex.acquire()
         report = pirate_scanner.build_report()
         mutex.release()
 
@@ -139,7 +147,7 @@ class PirateMassacreHandler(web_server.Handler):
 
         self.wfile.write(bytes(content, "utf-8"))
 
-    def send_finance_report(self):
+    def get_finance_report(self):
         if finance_scanner == None:
             return
 
@@ -152,16 +160,27 @@ class PirateMassacreHandler(web_server.Handler):
         self.send_header("Content-type", "text/json")
         self.end_headers()
 
-        content = finance_scanner.build_report_json()
+        content = report
         self.wfile.write(bytes(content, "utf-8"))
 
-def main_loop(book_mark):
+    def get_rebuild(self):
+        build_scanners()
+
+        self.send_response(200)
+        self.send_header("Content-type", "text/plain")
+        self.end_headers()
+
+        content = "Scanners Rebuilt"
+        self.wfile.write(bytes(content, "utf-8"))
+
+def main_loop():
     if rebuild_scanner_on_request:
         return
 
     global mutex
     global pirate_scanner
-    
+    global book_mark
+
     while True:
         time.sleep(0.5)
 
@@ -175,7 +194,7 @@ def main_loop(book_mark):
 if __name__ == "__main__":
     args = web_server.parse_args("Run a web server showing a live stream of your pirate massacre missions grouped by system.")
 
-    book_mark = build_scanners()
+    build_scanners()
 
     public_path = os.path.join(
         os.path.dirname(
@@ -184,4 +203,4 @@ if __name__ == "__main__":
 
     web_server.start(args, PirateMassacreHandler, public_path)
 
-    main_loop(book_mark)
+    main_loop()

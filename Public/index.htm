@@ -24,6 +24,20 @@
     <div id="Error" class="Panel">Connection error. Retrying...</div>
 
     <div id="Wrap">
+        <script type="text/javascript" language="javascript">
+            function request_rebuild() {
+                let xmlHttpReq = new XMLHttpRequest();
+                xmlHttpReq.open("GET", 'rebuild', false);
+                xmlHttpReq.send(null);
+                return xmlHttpReq.responseText;
+            };
+        </script>
+        <div id="MenuBar">
+            <button class="MenuButton">&#x1F4C3;</button>
+            <div id="Menu">
+                <a href="#" onclick="request_rebuild();">Rebuild Data</a>
+            </div>
+        </div>
         <div id="Missions" class="Panel">
             <div id="Loading">Loading...</div>
         </div>
