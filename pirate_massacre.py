@@ -120,6 +120,7 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
                 if mission_id not in current_missions:
                     self.remove_mission(mission_id)
 
+
     # {
     #     "timestamp": "2022-01-31T20:29:33Z",
     #     "event": "MissionAccepted",
@@ -147,14 +148,14 @@ class PirateMassacreScanner(journal_scan.JournalScanner):
 
             mission = MissionInfo(
                 id=id,
-                giving_faction=event['Faction'],
-                target_faction=event['TargetFaction'],
-                kill_count=event['KillCount'],
+                giving_faction=event.get('Faction'),
+                target_faction=event.get('TargetFaction'),
+                kill_count=event.get('KillCount'),
                 system_name=self.current_system,
-                description=event['LocalisedName'],
-                reward=event['Reward'],
+                description=event.get('LocalisedName'),
+                reward=event.get('Reward'),
                 expiry=expiry,
-                wing = is_wing_mission(event['Name']))
+                wing = is_wing_mission(event.get('Name')))
 
             self.add_mission(id, mission)
 
