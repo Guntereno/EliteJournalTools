@@ -1,8 +1,10 @@
 import argparse
 import json
 import os
+import re
+import time
 import traceback
-from datetime import datetime
+from datetime import datetime, timezone
 from dateutil import parser as date_parser
 from pytz import UTC
 
@@ -54,12 +56,56 @@ def include_journal_file(filename):
     return True
 
 
+filename_formats = [
+    # New: 'Journal.2022-03-15T130425.01.log'
+    (
+        re.compile(
+            u"""^Journal.(?P<date>\d{4}-\d{2}-\d{2}T\d{6}).(?P<part>\d+).log$"""),
+        '%Y-%m-%dT%H%M%S'
+    ),
+    # Old: 'Journal.180828201628.01.log'
+    (
+        re.compile(u"""^Journal.(?P<date>\d{12}).(?P<part>\d+).log$"""),
+        '%y%m%d%H%M%S'
+    )
+]
+
+
+def match_filename_to_entry(filename, regex, time_format):
+    match = re.search(regex, filename)
+    if match is not None:
+        struct = time.strptime(match.group('date'), time_format)
+        date = datetime.fromtimestamp(
+            time.mktime(struct), tz=timezone.utc)
+        part = int(match.group('part'))
+        return (filename, date, part)
+    return None
+
+
+def filename_to_entry(filename):
+    for format in filename_formats:
+        result = match_filename_to_entry(filename, format[0], format[1])
+        if result is not None:
+            return result
+    return None
+
+
 def get_journal_file_list():
     all_files = os.listdir(data_path)
-    return list(filter(lambda f: include_journal_file(f), all_files))
+
+    file_list = []
+    for filename in all_files:
+        entry = filename_to_entry(filename)
+        if entry is None:
+            continue
+        file_list.append(entry)
+
+    return sorted(file_list, key=lambda e: (e[1], e[2]))
 
 
-def scan_file(filename, scanners, book_mark=None):
+def scan_file(file_entry, scanners, book_mark=None):
+    filename = file_entry[0]
+
     if not isinstance(scanners, list):
         scanners = [scanners]
     for scanner in scanners:
@@ -111,44 +157,41 @@ def scan_file(filename, scanners, book_mark=None):
         return None
 
 
-def scan_files(scanners, filenames):
+def scan_files(scanners, file_entries):
     book_mark = None
-    for filename in filenames:
-        book_mark = scan_file(filename, scanners)
+    for entry in file_entries:
+        book_mark = scan_file(entry, scanners)
     return book_mark
 
 
-def file_in_file_range(file, start_file, end_file):
-    if (start_file is not None) and (file < start_file):
+def file_in_range(file_entry, start_date, end_date):
+    if start_date is not None and file_entry[1] < start_date:
         return False
-    if (end_file is not None) and (file > end_file):
+    if end_date is not None and file_entry[1] > end_date:
         return False
     return True
 
 
-def scan_files_in_file_range(scanners, start_file, end_file):
-    files_in_range = filter(lambda f: file_in_file_range(
-        f, start_file, end_file), get_journal_file_list())
-    return scan_files(scanners, files_in_range)
-
-
 def scan_journal_files_in_date_range(scanners, start_date, end_date):
-    date_format = 'Journal.%y%m%d%H%M%S.01.log'
-    start_file = None if start_date is None else start_date.strftime(
-        date_format)
-    end_file = None if end_date is None else end_date.strftime(date_format)
-    return scan_files_in_file_range(scanners, start_file, end_file)
+    files_in_range = filter(
+        lambda f: file_in_range(f, start_date, end_date),
+        get_journal_file_list())
+    scan_files(scanners, files_in_range)
 
 
 def resume_from_book_mark(scanners, book_mark):
     if book_mark is None:
         return
-    file_names = get_journal_file_list()
-    last_file_index = file_names.index(book_mark.filename)
+
+    file_entries = get_journal_file_list()
+    last_file_index = next(
+        i for i in file_entries if file_entries[i][0] == book_mark.filename)
+
     # Scan the first file
-    book_mark = scan_file(file_names[last_file_index], scanners, book_mark)
+    book_mark = scan_file(file_entries[last_file_index], scanners, book_mark)
+
     # Scan remaining files
-    remaining_files = file_names[(last_file_index+1):len(file_names)]
+    remaining_files = file_entries[(last_file_index+1):len(file_entries)]
     if(len(remaining_files) > 0):
         return scan_files(scanners, remaining_files)
     else:
